@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Bang_Tong_Hop_DRL"
+              pageWidth="842" pageHeight="595" orientation="Landscape"
+              columnWidth="782" leftMargin="30" rightMargin="30" topMargin="25" bottomMargin="25"
+              uuid="c1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6e">
+
+    <!-- Styles -->
+    <style name="Default" isDefault="true" fontName="DejaVu Sans" fontSize="9"/>
+    <style name="Bold" fontName="DejaVu Sans" fontSize="9" isBold="true"/>
+    <style name="TableCell" fontName="DejaVu Sans" fontSize="8">
+        <box topPadding="3" leftPadding="3" bottomPadding="3" rightPadding="3">
+            <pen lineWidth="0.5" lineColor="#CBD5E1"/>
+        </box>
+    </style>
+    <style name="TableHeader" fontName="DejaVu Sans" fontSize="8" isBold="true">
+        <box topPadding="4" leftPadding="3" bottomPadding="4" rightPadding="3">
+            <pen lineWidth="0.5" lineColor="#94A3B8"/>
+        </box>
+    </style>
+
+    <!-- Parameters -->
+    <parameter name="TEN_TRUONG" class="java.lang.String"/>
+    <parameter name="TIEU_DE" class="java.lang.String"/>
+    <parameter name="TEN_DOT" class="java.lang.String"/>
+    <parameter name="TEN_KHOA" class="java.lang.String"/>
+    <parameter name="TEN_LOP" class="java.lang.String"/>
+    <parameter name="HOC_KY" class="java.lang.String"/>
+    <parameter name="NAM_HOC" class="java.lang.String"/>
+    <parameter name="TONG_SO_SV" class="java.lang.Integer"/>
+    <parameter name="SO_XUAT_SAC" class="java.lang.Integer"/>
+    <parameter name="SO_TOT" class="java.lang.Integer"/>
+    <parameter name="SO_KHA" class="java.lang.Integer"/>
+    <parameter name="SO_TRUNG_BINH" class="java.lang.Integer"/>
+    <parameter name="SO_YEU_KEM" class="java.lang.Integer"/>
+    <parameter name="NGAY_XUAT" class="java.lang.String"/>
+    <parameter name="NGUOI_LAP" class="java.lang.String"/>
+
+    <!-- Fields -->
+    <field name="stt" class="java.lang.Integer"/>
+    <field name="mssv" class="java.lang.String"/>
+    <field name="hoTen" class="java.lang.String"/>
+    <field name="tenLop" class="java.lang.String"/>
+    <field name="tenKhoa" class="java.lang.String"/>
+    <field name="tieuChi1Admin" class="java.lang.Integer"/>
+    <field name="tieuChi2Admin" class="java.lang.Integer"/>
+    <field name="tieuChi3Admin" class="java.lang.Integer"/>
+    <field name="tieuChi4Admin" class="java.lang.Integer"/>
+    <field name="tieuChi5Admin" class="java.lang.Integer"/>
+    <field name="tongDiemSv" class="java.lang.Integer"/>
+    <field name="tongDiemAdmin" class="java.lang.Integer"/>
+    <field name="xepLoai" class="java.lang.String"/>
+    <field name="trangThai" class="java.lang.String"/>
+
+    <!-- Title Band -->
+    <title>
+        <band height="105" splitType="Stretch">
+            <!-- Header 2 Cột -->
+            <staticText>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <text><![CDATA[BỘ GIÁO DỤC VÀ ĐÀO TẠO]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="14" width="300" height="15"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TEN_TRUONG} != null ? $P{TEN_TRUONG} : "TRƯỜNG ĐẠI HỌC CÔNG NGHỆ"]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="100" y="30" width="100" height="1"/>
+                <graphicElement>
+                    <pen lineWidth="0.75"/>
+                </graphicElement>
+            </line>
+
+            <staticText>
+                <reportElement x="482" y="0" width="300" height="14"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="482" y="14" width="300" height="14"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Độc lập - Tự do - Hạnh phúc]]></text>
+            </staticText>
+            <line>
+                <reportElement x="572" y="29" width="120" height="1"/>
+                <graphicElement>
+                    <pen lineWidth="0.75"/>
+                </graphicElement>
+            </line>
+
+            <!-- Tiêu đề báo cáo -->
+            <textField>
+                <reportElement x="0" y="40" width="782" height="22"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TIEU_DE} != null ? $P{TIEU_DE} : "BẢNG TỔNG HỢP KẾT QUẢ ĐIỂM RÈN LUYỆN"]]></textFieldExpression>
+            </textField>
+
+            <!-- Dòng phụ đề lọc: Đợt, Khoa, Lớp -->
+            <textField>
+                <reportElement x="0" y="64" width="782" height="16"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="9" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Đợt: " + ($P{TEN_DOT} != null ? $P{TEN_DOT} : "Tất cả") +
+                    "  |  Khoa: " + ($P{TEN_KHOA} != null ? $P{TEN_KHOA} : "Tất cả") +
+                    "  |  Lớp: " + ($P{TEN_LOP} != null ? $P{TEN_LOP} : "Tất cả")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="82" width="782" height="15" forecolor="#475569"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="8" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["(Học kỳ: " + ($P{HOC_KY} != null ? $P{HOC_KY} : "Tất cả") + " - Năm học: " + ($P{NAM_HOC} != null ? $P{NAM_HOC} : "Tất cả") + ")"]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <!-- Column Header Band -->
+    <columnHeader>
+        <band height="30" splitType="Stretch">
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="0" y="0" width="30" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[STT]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="30" y="0" width="70" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Mã SV]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="100" y="0" width="140" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Họ và tên]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="240" y="0" width="65" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Lớp]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="305" y="0" width="85" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Khoa]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="390" y="0" width="40" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[TC1 (20)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="430" y="0" width="40" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[TC2 (25)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="470" y="0" width="40" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[TC3 (20)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="510" y="0" width="40" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[TC4 (25)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="550" y="0" width="40" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[TC5 (10)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="590" y="0" width="45" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[SV chấm]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="635" y="0" width="52" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Điểm duyệt]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="687" y="0" width="45" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Xếp loại]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="TableHeader" mode="Opaque" backcolor="#E2E8F0" x="732" y="0" width="50" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Trạng thái]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <!-- Detail Band: One row per student -->
+    <detail>
+        <band height="20" splitType="Stretch">
+            <textField>
+                <reportElement style="TableCell" x="0" y="0" width="30" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{stt}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="30" y="0" width="70" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{mssv}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="100" y="0" width="140" height="20"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{hoTen}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="240" y="0" width="65" height="20"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tenLop} != null ? $F{tenLop} : "---"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="305" y="0" width="85" height="20"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tenKhoa} != null ? $F{tenKhoa} : "---"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="390" y="0" width="40" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tieuChi1Admin} != null ? $F{tieuChi1Admin} : "-"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="430" y="0" width="40" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tieuChi2Admin} != null ? $F{tieuChi2Admin} : "-"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="470" y="0" width="40" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tieuChi3Admin} != null ? $F{tieuChi3Admin} : "-"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="510" y="0" width="40" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tieuChi4Admin} != null ? $F{tieuChi4Admin} : "-"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="550" y="0" width="40" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tieuChi5Admin} != null ? $F{tieuChi5Admin} : "-"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="590" y="0" width="45" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{tongDiemSv} != null ? $F{tongDiemSv} : 0]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" mode="Opaque" backcolor="#F1F5F9" x="635" y="0" width="52" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{tongDiemAdmin} != null ? $F{tongDiemAdmin} : "---"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="687" y="0" width="45" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{xepLoai} != null ? $F{xepLoai} : "---"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="TableCell" x="732" y="0" width="50" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA["DA_DUYET".equals($F{trangThai}) ? "Đã duyệt" : ("CHO_DUYET".equals($F{trangThai}) ? "Chờ duyệt" : "Từ chối")]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- Page Footer Band -->
+    <pageFooter>
+        <band height="20" splitType="Stretch">
+            <line>
+                <reportElement x="0" y="0" width="782" height="1"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="0" y="4" width="400" height="14" forecolor="#64748B"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[Hệ thống Quản lý Sinh viên - Phân hệ Điểm Rèn Luyện]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="600" y="4" width="140" height="14" forecolor="#64748B"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Trang " + $V{PAGE_NUMBER} + " / "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="740" y="4" width="40" height="14" forecolor="#64748B"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <!-- Summary Band: Statistics & Signature -->
+    <summary>
+        <band height="145" splitType="Stretch">
+            <!-- Box Thống kê -->
+            <rectangle>
+                <reportElement x="0" y="10" width="782" height="38" backcolor="#F8FAFC"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="10" y="14" width="130" height="15"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[THỐNG KÊ PHÂN LOẠI:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="10" y="29" width="760" height="15"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Tổng số sinh viên: " + ($P{TONG_SO_SV} != null ? $P{TONG_SO_SV} : 0) +
+                    "  |  Xuất sắc: " + ($P{SO_XUAT_SAC} != null ? $P{SO_XUAT_SAC} : 0) +
+                    "  |  Tốt: " + ($P{SO_TOT} != null ? $P{SO_TOT} : 0) +
+                    "  |  Khá: " + ($P{SO_KHA} != null ? $P{SO_KHA} : 0) +
+                    "  |  Trung bình: " + ($P{SO_TRUNG_BINH} != null ? $P{SO_TRUNG_BINH} : 0) +
+                    "  |  Yếu/Kém: " + ($P{SO_YEU_KEM} != null ? $P{SO_YEU_KEM} : 0)]]></textFieldExpression>
+            </textField>
+
+            <!-- Ngày ký và Đại diện ký tên -->
+            <textField>
+                <reportElement x="500" y="58" width="282" height="15"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{NGAY_XUAT} != null ? $P{NGAY_XUAT} : "Ngày ..... tháng ..... năm 20...."]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="50" y="75" width="200" height="15"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[NGƯỜI LẬP BẢNG]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="50" y="90" width="200" height="12"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="8" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[(Ký và ghi rõ họ tên)]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="50" y="125" width="200" height="15"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{NGUOI_LAP} != null ? $P{NGUOI_LAP} : "Người lập"]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="540" y="75" width="200" height="15"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[HỘI ĐỒNG ĐÁNH GIÁ ĐRL]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="540" y="90" width="200" height="12"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="8" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[(Ký, ghi rõ họ tên và đóng dấu)]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>

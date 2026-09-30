@@ -1,0 +1,252 @@
+@if (isStudent) {
+<section class="section-page">
+  <header class="section-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Hệ Thống Đào Tạo & Rèn Luyện Sinh Viên</p>
+      <h1>Xin chào, {{ currentUserName }}!</h1>
+      <span>Chào mừng bạn đến với hệ thống quản lý sinh viên và đánh giá điểm rèn luyện trực tuyến.</span>
+    </div>
+  </header>
+
+  <!-- Latest Conduct Status Widget -->
+  @if (latestDrl) {
+  <div class="student-status-banner">
+    <div class="status-left">
+      <span class="banner-sub">Phiếu rèn luyện gần nhất</span>
+      <h3>Học kỳ {{ latestDrl.hocKy }} - Năm học {{ latestDrl.namHoc }}</h3>
+      <div class="status-tags">
+        <span class="badge" [ngClass]="getBadgeClass(latestDrl.trangThai)">
+          {{ getTrangThaiText(latestDrl.trangThai) }}
+        </span>
+        @if (latestDrl.trangThai === 'DA_DUYET') {
+        <span class="rank-tag" [ngClass]="getXepLoaiClass(latestDrl.xepLoai)">
+          {{ formatXepLoai(latestDrl.xepLoai) }} ({{ latestDrl.tongDiemAdmin }}đ)
+        </span>
+        } @else {
+        <span class="rank-tag" [ngClass]="getXepLoaiClass(latestDrl.xepLoai)">
+          Tự chấm: {{ latestDrl.tongDiemSv }}đ
+        </span>
+        }
+      </div>
+    </div>
+    <div class="status-right">
+      <a routerLink="/sinh-vien/ket-qua-drl" class="btn-view-result">Xem chi tiết kết quả →</a>
+    </div>
+  </div>
+  }
+
+  <!-- Feature Quick Links -->
+  <div class="student-feature-cards">
+    <a routerLink="/sinh-vien/danh-gia-drl" class="feature-card card-teal">
+      <div class="card-icon">📝</div>
+      <div class="card-text">
+        <h3>Đánh giá Điểm rèn luyện</h3>
+        <p>Tự chấm 5 tiêu chuẩn theo quy định của Bộ GD&ĐT (thang điểm 100), đính kèm minh chứng và nộp lên Nhà trường.
+        </p>
+        <span class="card-arrow">Điền phiếu tự đánh giá →</span>
+      </div>
+    </a>
+
+    <a routerLink="/sinh-vien/ket-qua-drl" class="feature-card card-orange">
+      <div class="card-icon">📊</div>
+      <div class="card-text">
+        <h3>Kết quả & Lịch sử rèn luyện</h3>
+        <p>Theo dõi điểm duyệt chính thức, xếp loại rèn luyện theo kỳ, xem phản hồi hoặc sửa lại phiếu nếu bị từ chối.
+        </p>
+        <span class="card-arrow">Xem kết quả rèn luyện →</span>
+      </div>
+    </a>
+
+    <a routerLink="/sinh-vien/ho-so-ca-nhan" class="feature-card card-slate">
+      <div class="card-icon">👤</div>
+      <div class="card-text">
+        <h3>Hồ sơ sinh viên</h3>
+        <p>Xem thông tin học vụ, lớp hành chính, khoa, cập nhật số điện thoại, email, địa chỉ và đổi mật khẩu.</p>
+        <span class="card-arrow">Xem hồ sơ cá nhân →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Regulation Guidance Notice -->
+  <div class="portal-notice-panel">
+    <div class="notice-header">
+      <h3>📢 Quy định khung đánh giá Điểm Rèn Luyện (ĐRL)</h3>
+    </div>
+    <div class="notice-list">
+      <div class="notice-item">
+        <span class="notice-tag tag-urgent">Khung điểm 100</span>
+        <div>
+          <strong>5 Tiêu chuẩn đánh giá chuẩn của Bộ GD&ĐT</strong>
+          <p>1. Ý thức học tập (max 20đ) | 2. Chấp hành nội quy, quy chế (max 25đ) | 3. Hoạt động phong trào, tình
+            nguyện (max 20đ) | 4. Phẩm chất công dân & cộng đồng (max 25đ) | 5. Phụ trách lớp & đoàn thể (max 10đ).</p>
+        </div>
+      </div>
+      <div class="notice-item">
+        <span class="notice-tag tag-info">Thang xếp loại</span>
+        <div>
+          <strong>Phân loại kết quả rèn luyện</strong>
+          <p>Từ 90 - 100đ: Xuất sắc | Từ 80 - dưới 90đ: Tốt | Từ 65 - dưới 80đ: Khá | Từ 50 - dưới 65đ: Trung bình | Từ
+            35 - dưới 50đ: Yếu | Dưới 35đ: Kém.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+} @else {
+<!-- ADMIN DASHBOARD -->
+<section class="section-page">
+  <header class="section-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Bảng Điều Khiển Quản Trị</p>
+      <h1>Hệ Thống Quản Lý Sinh Viên & Điểm Rèn Luyện</h1>
+      <span>Theo dõi số liệu toàn trường, quản trị cơ cấu Khoa - Lớp - Sinh viên và xét duyệt điểm rèn luyện.</span>
+    </div>
+  </header>
+
+  <!-- Admin Metric Cards -->
+  <div class="admin-stats-grid">
+    <div class="admin-stat-card">
+      <div class="icon-wrap bg-blue">👨‍🎓</div>
+      <div class="stat-body">
+        <span class="lbl">Tổng số Sinh viên</span>
+        <strong class="val">{{ stats.tongSinhVien }}</strong>
+        <a routerLink="/quan-ly/sinh-vien" class="card-link">Quản lý sinh viên →</a>
+      </div>
+    </div>
+
+    <div class="admin-stat-card">
+      <div class="icon-wrap bg-indigo">🏛️</div>
+      <div class="stat-body">
+        <span class="lbl">Khoa chuyên môn</span>
+        <strong class="val">{{ stats.tongKhoa }}</strong>
+        <a routerLink="/quan-ly/khoa" class="card-link">Quản lý khoa →</a>
+      </div>
+    </div>
+
+    <div class="admin-stat-card">
+      <div class="icon-wrap bg-emerald">🏫</div>
+      <div class="stat-body">
+        <span class="lbl">Lớp hành chính</span>
+        <strong class="val">{{ stats.tongLop }}</strong>
+        <a routerLink="/quan-ly/lop" class="card-link">Quản lý lớp →</a>
+      </div>
+    </div>
+
+    <div class="admin-stat-card card-pending" [class.highlight-pending]="stats.phieuDrlChoDuyet > 0">
+      <div class="icon-wrap bg-amber">⏳</div>
+      <div class="stat-body">
+        <span class="lbl">Phiếu ĐRL chờ duyệt</span>
+        <strong class="val text-amber">{{ stats.phieuDrlChoDuyet }}</strong>
+        <a routerLink="/quan-ly/diem-ren-luyen" class="card-link text-amber">Vào phê duyệt ngay →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary Overview: Phân bố Xếp loại rèn luyện -->
+  <div class="drl-distribution-panel">
+    <div class="panel-header">
+      <h3>📊 Thống kê Phân Bố Xếp Loại Điểm Rèn Luyện Toàn Trường</h3>
+      <a routerLink="/quan-ly/diem-ren-luyen" class="btn-link">Xem danh sách phiếu →</a>
+    </div>
+    <div class="distribution-grid">
+      <div class="dist-card rank-xs">
+        <span class="dist-title">Xuất sắc</span>
+        <strong class="dist-val">{{ stats.phanBoXepLoaiDrl['Xuất sắc'] || 0 }}</strong>
+        <small>Từ 90 đến 100đ</small>
+      </div>
+      <div class="dist-card rank-tot">
+        <span class="dist-title">Tốt</span>
+        <strong class="dist-val">{{ stats.phanBoXepLoaiDrl['Tốt'] || 0 }}</strong>
+        <small>Từ 80 đến 89đ</small>
+      </div>
+      <div class="dist-card rank-kha">
+        <span class="dist-title">Khá</span>
+        <strong class="dist-val">{{ stats.phanBoXepLoaiDrl['Khá'] || 0 }}</strong>
+        <small>Từ 65 đến 79đ</small>
+      </div>
+      <div class="dist-card rank-tb">
+        <span class="dist-title">Trung bình</span>
+        <strong class="dist-val">{{ stats.phanBoXepLoaiDrl['Trung bình'] || 0 }}</strong>
+        <small>Từ 50 đến 64đ</small>
+      </div>
+      <div class="dist-card rank-yeu">
+        <span class="dist-title">Yếu</span>
+        <strong class="dist-val">{{ stats.phanBoXepLoaiDrl['Yếu'] || 0 }}</strong>
+        <small>Từ 35 đến 49đ</small>
+      </div>
+      <div class="dist-card rank-kem">
+        <span class="dist-title">Kém</span>
+        <strong class="dist-val">{{ stats.phanBoXepLoaiDrl['Kém'] || 0 }}</strong>
+        <small>Dưới 35đ</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thống kê ĐRL tổng hợp theo Khoa (API Native Query) -->
+  <div class="drl-distribution-panel" style="margin-top: 1.5rem;">
+    <div class="panel-header">
+      <div>
+        <h3>🏛️ Thống Kê Điểm Rèn Luyện Theo Khoa</h3>
+      </div>
+    </div>
+    @if (khoaStats.length > 0) {
+    <div style="overflow-x: auto; margin-top: 1rem; border: 1px solid var(--border); border-radius: 12px; background: white;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; min-width: 750px;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; background: #f8fafc;">
+            <th style="padding: 10px 14px; white-space: nowrap;">Mã Khoa</th>
+            <th style="padding: 10px 14px; white-space: nowrap;">Tên Khoa</th>
+            <th style="padding: 10px 14px; text-align: center; white-space: nowrap;">Tổng SV</th>
+            <th style="padding: 10px 14px; text-align: center; white-space: nowrap;">Đã nộp</th>
+            <th style="padding: 10px 14px; text-align: center; white-space: nowrap;">Đã duyệt</th>
+            <th style="padding: 10px 14px; text-align: center; white-space: nowrap;">Điểm TB</th>
+            <th style="padding: 10px 14px; text-align: center; white-space: nowrap;">Điểm cao nhất</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (k of paginatedKhoaStats; track k.khoaId) {
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 14px; font-weight: 600; color: #3b82f6;">{{ k.maKhoa }}</td>
+            <td style="padding: 10px 14px; font-weight: 500;">{{ k.tenKhoa }}</td>
+            <td style="padding: 10px 14px; text-align: center;">{{ k.tongSinhVien }}</td>
+            <td style="padding: 10px 14px; text-align: center;">{{ k.soPhieuDaNop }}</td>
+            <td style="padding: 10px 14px; text-align: center; color: #10b981; font-weight: 600;">{{ k.soPhieuDaDuyet }}</td>
+            <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #0284c7;">{{ k.diemTrungBinh }}</td>
+            <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #f59e0b;">{{ k.diemCaoNhat }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Thanh phân trang rõ ràng cho bảng Thống kê Khoa -->
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          <span>Hiển thị <strong>{{ startIndex + 1 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ khoaStats.length }}</strong> khoa</span>
+          <div class="page-size-wrap">
+            <label>Mỗi trang:</label>
+            <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
+            </select>
+          </div>
+        </div>
+        <div class="pagination-controls">
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)" title="Trang đầu">«</button>
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" title="Trang trước">‹</button>
+          
+          @for (p of visiblePages; track p) {
+            <button type="button" class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+          }
+          
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" title="Trang sau">›</button>
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)" title="Trang cuối">»</button>
+        </div>
+      </div>
+    </div>
+    } @else {
+    <p style="padding: 1.5rem; text-align: center; color: #94a3b8;">Chưa có dữ liệu thống kê khoa.</p>
+    }
+  </div>
+</section>
+}

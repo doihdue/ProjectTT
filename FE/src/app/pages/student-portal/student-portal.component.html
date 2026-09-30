@@ -1,0 +1,833 @@
+<div class="student-portal-wrapper">
+  <!-- Top Portal Header & Identity Banner -->
+  <header class="portal-identity-banner">
+    <div class="banner-main">
+      <div class="student-avatar-box">
+        <span class="avatar-text">{{ studentInitials }}</span>
+        <span class="status-indicator" title="Tài khoản đang hoạt động"></span>
+      </div>
+      <div class="student-meta">
+        <div class="meta-headline">
+          <span class="badge-role">Cổng Thông Tin Sinh Viên</span>
+          <h1>{{ profile?.hoTen || 'Sinh viên' }}</h1>
+        </div>
+        <div class="meta-chips">
+          <span class="chip chip-accent">
+            <strong>MSV:</strong> {{ profile?.mssv || '---' }}
+          </span>
+          <span class="chip">
+            <strong>Lớp:</strong> {{ profile?.lopTen || '---' }}
+          </span>
+          <span class="chip">
+            <strong>Khoa:</strong> {{ profile?.khoaTen || '---' }}
+          </span>
+          <span class="chip chip-success">
+            <strong>Hệ đào tạo:</strong> Chính quy
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner-actions print-hide">
+      <button type="button" class="btn-secondary" (click)="printPage()" title="In trang hoặc lưu PDF">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+          <path d="M6 14h12v8H6z" />
+        </svg>
+        In trang
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="portal-nav-tabs print-hide">
+    @for (tab of navTabs; track tab.key) {
+    <a [routerLink]="tab.path" [class.active]="mode === tab.key" class="portal-nav-tab">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path [attr.d]="tab.icon" />
+      </svg>
+      <span>{{ tab.label }}</span>
+    </a>
+    }
+  </nav>
+
+  <!-- Global Feedback Message -->
+  @if (feedbackMessage) {
+  <div class="portal-alert" [class.alert-success]="feedbackMessage.type === 'success'"
+    [class.alert-danger]="feedbackMessage.type === 'error'">
+    <div class="alert-icon">
+      @if (feedbackMessage.type === 'success') {
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+      } @else {
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      }
+    </div>
+    <div class="alert-content">{{ feedbackMessage.text }}</div>
+    <button type="button" class="alert-close" (click)="feedbackMessage = null">✕</button>
+  </div>
+  }
+
+  <!-- TAB 1: ĐÁNH GIÁ ĐIỂM RÈN LUYỆN -->
+  @if (mode === 'evaluation') {
+  <section class="portal-card">
+    <div class="card-header">
+      <div>
+        <h2>Phiếu Tự Đánh Giá Điểm Rèn Luyện</h2>
+        <p class="subtitle">Thực hiện đánh giá theo 5 tiêu chuẩn chuẩn quy định của Bộ GD&ĐT (Thang điểm 100)</p>
+      </div>
+    </div>
+
+    <!-- TRƯỜNG HỢP 1: ĐANG TẢI ĐỢT -->
+    @if (loadingDots) {
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>Đang kiểm tra các đợt đánh giá rèn luyện từ Nhà trường...</p>
+    </div>
+    }
+    <!-- TRƯỜNG HỢP 2: KHÔNG CÓ ĐỢT NÀO ĐANG MỞ -->
+    @else if (openDots.length === 0) {
+    <div class="no-dot-alert-card">
+      <div class="lock-icon-box">🔒</div>
+      <h3>Hiện tại Nhà trường chưa mở đợt đánh giá Điểm Rèn Luyện</h3>
+      <p class="lock-desc">
+        Nhà trường sẽ mở từng đợt đánh giá theo kế hoạch học kỳ. Sinh viên chỉ có thể thực hiện tự chấm điểm khi có đợt
+        đang mở.
+        Vui lòng theo dõi thông báo và quay lại khi đợt mới được kích hoạt!
+      </p>
+      <div class="lock-actions">
+        <button type="button" class="btn-check-again" (click)="loadOpenDots()">
+          🔄 Kiểm tra lại đợt đánh giá
+        </button>
+        <a routerLink="/sinh-vien/ket-qua-drl" class="btn-goto-history">
+          📜 Xem kết quả & lịch sử các đợt trước
+        </a>
+      </div>
+    </div>
+    }
+    <!-- TRƯỜNG HỢP 3: CÓ ĐỢT ĐANG MỞ -->
+    @else {
+    <!-- Thanh chọn đợt đánh giá -->
+    <div class="dot-picker-banner">
+      <div class="picker-left">
+        <span class="picker-badge">🟢 ĐANG MỞ ĐỢT</span>
+        <div class="picker-select-group">
+          <label>Đợt đánh giá đang mở:</label>
+          <select (change)="onDotSelectChange($event)">
+            @for (dot of openDots; track dot.id) {
+            <option [value]="dot.id" [selected]="dot.id === selectedDot?.id">
+              {{ dot.tenDot }} (Học kỳ {{ dot.hocKy }} - {{ dot.namHoc }})
+            </option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (selectedDot) {
+      <div class="picker-right">
+        <div class="meta-tag">
+          <span class="label">Thời hạn:</span>
+          <strong class="val">
+            {{ selectedDot.ngayKetThuc ? (selectedDot.ngayKetThuc | date: 'dd/MM/yyyy') : 'Chưa có hạn chót' }}
+          </strong>
+        </div>
+        @if (selectedDot.ghiChu) {
+        <div class="meta-tag note">
+          <span class="label">Lưu ý:</span>
+          <span class="val">{{ selectedDot.ghiChu }}</span>
+        </div>
+        }
+      </div>
+      }
+    </div>
+
+    <!-- Trạng thái phiếu hiện tại của sinh viên trong đợt đã chọn -->
+    @if (currentDotExistingDrl) {
+    @if (currentDotExistingDrl.trangThai === 'DA_DUYET') {
+    <div class="alert-status-card alert-status-approved">
+      <div class="status-icon">🎉</div>
+      <div class="status-content">
+        <strong>Bản đánh giá đợt này đã được Ban Quản trị phê duyệt chính thức!</strong>
+        <p>
+          Điểm duyệt chính thức: <strong>{{ currentDotExistingDrl.tongDiemAdmin }} / 100 điểm</strong> |
+          Xếp loại: <strong>{{ formatXepLoai(currentDotExistingDrl.xepLoai) }}</strong>.
+          Bản đánh giá đã hoàn tất và được khóa bảo lưu.
+        </p>
+      </div>
+    </div>
+    } @else if (currentDotExistingDrl.trangThai === 'TU_CHOI') {
+    <div class="alert-status-card alert-status-rejected">
+      <div class="status-icon">⚠️</div>
+      <div class="status-content">
+        <strong>Bản đánh giá của bạn bị yêu cầu chỉnh sửa:</strong>
+        <p>{{ currentDotExistingDrl.nhanXetAdmin || 'Vui lòng bổ sung minh chứng và kiểm tra lại điểm tự chấm.' }}</p>
+        <small>Bạn có thể chỉnh sửa lại điểm bên dưới và bấm nút Gửi lại phiếu.</small>
+      </div>
+    </div>
+    } @else {
+    <div class="alert-status-card alert-status-pending">
+      <div class="status-icon">⏳</div>
+      <div class="status-content">
+        <strong>Bạn đã nộp phiếu đánh giá cho đợt này (Đang chờ duyệt)</strong>
+        <p>Tổng điểm bạn tự chấm: <strong>{{ currentDotExistingDrl.tongDiemSv }} điểm</strong> (Dự kiến: {{
+          formatXepLoai(currentDotExistingDrl.xepLoai) }}). Bạn vẫn có thể chỉnh sửa và cập nhật lại điểm nếu cần.</p>
+      </div>
+    </div>
+    }
+    }
+
+    <form [formGroup]="drlForm" (ngSubmit)="submitDrl()" class="drl-form">
+      <!-- Live Score Summary Widget -->
+      <div class="score-summary-banner">
+        <div class="summary-left">
+          <span class="label">Tổng điểm tự đánh giá</span>
+          <div class="score-display">
+            <span class="points">{{ currentSelfTotal }}</span>
+            <span class="total-max">/ 100 điểm</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-fill" [style.width.%]="currentSelfTotal"></div>
+          </div>
+        </div>
+        <div class="summary-right">
+          <span class="label">Dự kiến xếp loại</span>
+          <span class="rank-badge-large" [ngClass]="getXepLoaiClass(currentSelfClassification)">
+            {{ currentSelfClassification }}
+          </span>
+        </div>
+      </div>
+
+      <!-- 5 Tiêu chuẩn Đánh giá Chi tiết -->
+      <div class="criteria-cards-container">
+        <!-- Tiêu chuẩn 1 -->
+        <div class="criterion-card">
+          <div class="criterion-header">
+            <div class="c-badge">Tiêu chuẩn 1</div>
+            <h3>Ý thức tham gia học tập (Tối đa 20 điểm)</h3>
+          </div>
+          <p class="c-desc">
+            Bao gồm: Đi học chuyên cần, đúng giờ (max 5đ); Ý thức kỷ luật và phát biểu xây dựng bài trong giờ học (max
+            5đ); Điểm trung bình học tập GPA (max 10đ); Không vi phạm quy chế thi cử.
+          </p>
+          <div class="c-input-row">
+            <label>Điểm tự đánh giá (0 - 20):</label>
+            <input type="number" min="0" max="20" formControlName="tieuChi1Sv" />
+          </div>
+        </div>
+
+        <!-- Tiêu chuẩn 2 -->
+        <div class="criterion-card">
+          <div class="criterion-header">
+            <div class="c-badge">Tiêu chuẩn 2</div>
+            <h3>Ý thức chấp hành nội quy, quy chế, quy định (Tối đa 25 điểm)</h3>
+          </div>
+          <p class="c-desc">
+            Bao gồm: Chấp hành các chủ trương, văn bản chỉ đạo của Nhà trường (max 10đ); Hoàn thành nghĩa vụ học phí và
+            các thủ tục hành chính đúng hạn (max 10đ); Tham gia đầy đủ tuần sinh hoạt công dân sinh viên và họp lớp (max
+            5đ).
+          </p>
+          <div class="c-input-row">
+            <label>Điểm tự đánh giá (0 - 25):</label>
+            <input type="number" min="0" max="25" formControlName="tieuChi2Sv" />
+          </div>
+        </div>
+
+        <!-- Tiêu chuẩn 3 -->
+        <div class="criterion-card">
+          <div class="criterion-header">
+            <div class="c-badge">Tiêu chuẩn 3</div>
+            <h3>Ý thức tham gia các hoạt động chính trị, xã hội, phong trào (Tối đa 20 điểm)</h3>
+          </div>
+          <p class="c-desc">
+            Bao gồm: Tham gia hoạt động Đoàn - Hội, tình nguyện hè, hiến máu nhân đạo (max 8đ); Tham gia phong trào văn
+            nghệ, hội thao, câu lạc bộ học thuật (max 6đ); Tuyên truyền phòng chống tệ nạn xã hội (max 6đ).
+          </p>
+          <div class="c-input-row">
+            <label>Điểm tự đánh giá (0 - 20):</label>
+            <input type="number" min="0" max="20" formControlName="tieuChi3Sv" />
+          </div>
+        </div>
+
+        <!-- Tiêu chuẩn 4 -->
+        <div class="criterion-card">
+          <div class="criterion-header">
+            <div class="c-badge">Tiêu chuẩn 4</div>
+            <h3>Phẩm chất công dân và quan hệ với cộng đồng (Tối đa 25 điểm)</h3>
+          </div>
+          <p class="c-desc">
+            Bao gồm: Chấp hành tốt chủ trương của Đảng, chính sách pháp luật Nhà nước (max 10đ); Lối sống lành mạnh, ứng
+            xử văn minh với thầy cô, bạn bè (max 10đ); Tinh thần đoàn kết, tương thân tương ái giúp đỡ bạn học (max 5đ).
+          </p>
+          <div class="c-input-row">
+            <label>Điểm tự đánh giá (0 - 25):</label>
+            <input type="number" min="0" max="25" formControlName="tieuChi4Sv" />
+          </div>
+        </div>
+
+        <!-- Tiêu chuẩn 5 -->
+        <div class="criterion-card">
+          <div class="criterion-header">
+            <div class="c-badge">Tiêu chuẩn 5</div>
+            <h3>Ý thức và kết quả tham gia phụ trách lớp, đoàn thể (Tối đa 10 điểm)</h3>
+          </div>
+          <p class="c-desc">
+            Bao gồm: Đảm nhận nhiệm vụ Ban cán sự lớp, BCH Đoàn - Hội, Đội trưởng CLB (max 5đ); Hoàn thành tốt nhiệm vụ,
+            tích cực hỗ trợ các phong trào chung hoặc có thành tích khen thưởng (max 5đ).
+          </p>
+          <div class="c-input-row">
+            <label>Điểm tự đánh giá (0 - 10):</label>
+            <input type="number" min="0" max="10" formControlName="tieuChi5Sv" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Evidence & Notes Section -->
+      <div class="evidence-section">
+        <h3>Ghi chú & Minh chứng rèn luyện</h3>
+        <div class="form-group">
+          <label>Ghi chú quá trình rèn luyện:</label>
+          <textarea rows="3" formControlName="ghiChuSinhVien"
+            placeholder="Ghi tóm tắt những hoạt động tiêu biểu đã tham gia trong đợt này..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Liên kết minh chứng (Link Google Drive, file, hình ảnh chứng nhận):</label>
+          <input type="text" formControlName="minhChung"
+            placeholder="https://drive.google.com/drive/folders/... hoặc liên kết ảnh minh chứng" />
+          <span class="field-hint">Đính kèm link tài liệu minh chứng để Hội đồng / Ban Quản trị dễ dàng đối chiếu và phê
+            duyệt nhanh chóng.</span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        @if (currentDotExistingDrl?.trangThai === 'DA_DUYET') {
+        <div class="btn-disabled-notice">
+          🔒 Phiếu đợt này đã được duyệt chính thức. Bạn không cần nộp lại.
+        </div>
+        } @else {
+        <button type="submit" class="btn-submit-drl" [disabled]="submittingDrl">
+          @if (submittingDrl) {
+          <span>Đang gửi phiếu...</span>
+          } @else if (currentDotExistingDrl) {
+          <span>🔄 Cập nhật lại phiếu đánh giá của đợt này</span>
+          } @else {
+          <span>🚀 Gửi phiếu tự đánh giá lên Ban Quản Trị</span>
+          }
+        </button>
+        }
+      </div>
+    </form>
+    }
+  </section>
+  }
+
+  <!-- TAB 2: KẾT QUẢ & LỊCH SỬ RÈN LUYỆN -->
+  @if (mode === 'results') {
+  <section class="portal-card">
+    <div class="card-header">
+      <div>
+        <h2>Kết Quả & Lịch Sử Đánh Giá Điểm Rèn Luyện</h2>
+        <p class="subtitle">Theo dõi trạng thái xét duyệt, xếp loại rèn luyện và nhận xét của Nhà trường qua từng đợt
+          đánh giá</p>
+      </div>
+      <button class="btn-secondary" (click)="loadDrlHistory()">
+        🔄 Làm mới
+      </button>
+    </div>
+
+    @if (loadingHistory) {
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>Đang tải kết quả rèn luyện...</p>
+    </div>
+    } @else if (myDrlList.length === 0) {
+    <div class="empty-box">
+      <div class="empty-icon">📝</div>
+      <h3>Bạn chưa có bản đánh giá điểm rèn luyện nào</h3>
+      <p>Khi Nhà trường mở đợt đánh giá, hãy chuyển sang mục "Đánh giá Điểm rèn luyện" để điền phiếu tự chấm.</p>
+      <a routerLink="/sinh-vien/danh-gia-drl" class="btn-primary">Kiểm tra đợt đánh giá ngay</a>
+    </div>
+    } @else {
+    <!-- Thanh lọc trạng thái phiếu -->
+    <div class="history-filter-bar">
+      <div class="filter-tabs">
+        <button
+          type="button"
+          class="filter-btn"
+          [class.active]="historyStatusFilter === 'ALL'"
+          (click)="setHistoryStatusFilter('ALL')"
+        >
+          <span>Tất cả</span>
+          <span class="count-badge">{{ myDrlList.length }}</span>
+        </button>
+        <button
+          type="button"
+          class="filter-btn"
+          [class.active]="historyStatusFilter === 'DA_DUYET'"
+          (click)="setHistoryStatusFilter('DA_DUYET')"
+        >
+          <span>Đã duyệt</span>
+          <span class="count-badge">{{ countByStatus('DA_DUYET') }}</span>
+        </button>
+        <button
+          type="button"
+          class="filter-btn"
+          [class.active]="historyStatusFilter === 'CHO_DUYET'"
+          (click)="setHistoryStatusFilter('CHO_DUYET')"
+        >
+          <span>Chờ duyệt</span>
+          <span class="count-badge">{{ countByStatus('CHO_DUYET') }}</span>
+        </button>
+        <button
+          type="button"
+          class="filter-btn"
+          [class.active]="historyStatusFilter === 'TU_CHOI'"
+          (click)="setHistoryStatusFilter('TU_CHOI')"
+        >
+          <span>Bị từ chối</span>
+          <span class="count-badge">{{ countByStatus('TU_CHOI') }}</span>
+        </button>
+      </div>
+    </div>
+
+    @if (filteredDrlList.length === 0) {
+    <div class="empty-box">
+      <div class="empty-icon">🔍</div>
+      <h3>Không tìm thấy phiếu nào</h3>
+      <p>Không có phiếu đánh giá nào phù hợp với bộ lọc trạng thái được chọn.</p>
+    </div>
+    } @else {
+    <div class="history-list">
+      @for (drl of pagedDrlList; track drl.id) {
+      <div class="history-card" [class.rejected-border]="drl.trangThai === 'TU_CHOI'">
+        <div class="history-header">
+          <div class="period-info">
+            <strong class="dot-title-card">{{ formatDotTitle(drl) }}</strong>
+            <span class="sem-badge">HK{{ drl.hocKy }} ({{ drl.namHoc }})</span>
+          </div>
+          <div class="status-box">
+            <span class="badge" [ngClass]="getBadgeClass(drl.trangThai)">
+              {{ getTrangThaiText(drl.trangThai) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="history-body">
+          <div class="score-breakdown">
+            <div class="score-card-mini self">
+              <span class="label">SV Tự chấm</span>
+              <strong class="val">{{ drl.tongDiemSv }} <small>/100</small></strong>
+            </div>
+
+            <div class="score-card-mini approved">
+              <span class="label">Điểm được duyệt</span>
+              @if (drl.trangThai === 'DA_DUYET') {
+              <strong class="val highlight">{{ drl.tongDiemAdmin }} <small>/100</small></strong>
+              } @else {
+              <span class="val-pending">Chờ phê duyệt</span>
+              }
+            </div>
+
+            <div class="score-card-mini rank">
+              <span class="label">Xếp loại chính thức</span>
+              @if (drl.trangThai === 'DA_DUYET') {
+              <span class="rank-badge" [ngClass]="getXepLoaiClass(drl.xepLoai)">{{ formatXepLoai(drl.xepLoai) }}</span>
+              } @else {
+              <span class="rank-badge" [ngClass]="getXepLoaiClass(drl.xepLoai)">Dự kiến: {{ formatXepLoai(drl.xepLoai)
+                }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Tiêu chí chi tiết bảng nhỏ -->
+          <div class="criteria-summary-row">
+            <span class="tag">TC1: {{ drl.tieuChi1Admin != null ? drl.tieuChi1Admin : drl.tieuChi1Sv }}/20đ</span>
+            <span class="tag">TC2: {{ drl.tieuChi2Admin != null ? drl.tieuChi2Admin : drl.tieuChi2Sv }}/25đ</span>
+            <span class="tag">TC3: {{ drl.tieuChi3Admin != null ? drl.tieuChi3Admin : drl.tieuChi3Sv }}/20đ</span>
+            <span class="tag">TC4: {{ drl.tieuChi4Admin != null ? drl.tieuChi4Admin : drl.tieuChi4Sv }}/25đ</span>
+            <span class="tag">TC5: {{ drl.tieuChi5Admin != null ? drl.tieuChi5Admin : drl.tieuChi5Sv }}/10đ</span>
+          </div>
+
+          @if (drl.nhanXetAdmin) {
+          <div class="admin-feedback-box" [class.alert-danger-box]="drl.trangThai === 'TU_CHOI'">
+            <strong>Nhận xét từ Ban Quản trị / Hội đồng:</strong>
+            <p>{{ drl.nhanXetAdmin }}</p>
+          </div>
+          }
+
+          @if (drl.minhChung) {
+          <div class="minhchung-preview">
+            <span>Minh chứng: </span>
+            <a [href]="drl.minhChung" target="_blank" rel="noopener noreferrer">
+              {{ drl.minhChung }}
+            </a>
+          </div>
+          }
+        </div>
+
+        <div class="history-footer">
+          <span class="date-submitted">Đã nộp: {{ drl.ngayNop | date: 'dd/MM/yyyy HH:mm' }}</span>
+          <div class="history-footer-actions">
+            <button
+              type="button"
+              class="btn-export-pdf-student"
+              (click)="exportPhieuPdf(drl)"
+              [disabled]="exportingPdfId === drl.id"
+              title="Tải Phiếu kết quả đánh giá Điểm Rèn Luyện cá nhân ra file PDF (JasperReports)"
+            >
+              @if (exportingPdfId === drl.id) {
+                <span class="btn-spinner-sm"></span>
+                <span>Đang tải PDF...</span>
+              } @else {
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <path d="M12 18v-6m0 6l-3-3m3 3l3-3"/>
+                </svg>
+                <span>Tải Phiếu ĐRL (PDF)</span>
+              }
+            </button>
+            @if (drl.trangThai === 'TU_CHOI') {
+            <button type="button" class="btn-resubmit" (click)="editRejectedDrl(drl)">
+              ✏️ Chỉnh sửa & Nộp lại phiếu này
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Thanh phân trang phiếu đánh giá -->
+    <div class="pagination-bar history-pagination">
+      <div class="pagination-info">
+        <span>Hiển thị <strong>{{ historyStartIndex }}</strong> - <strong>{{ historyEndIndex }}</strong> trên tổng số <strong>{{ filteredDrlList.length }}</strong> phiếu đánh giá</span>
+        <div class="page-size-wrap">
+          <label for="historyPageSize">Hiển thị:</label>
+          <select id="historyPageSize" [value]="historyPageSize" (change)="onHistoryPageSizeChange($event)">
+            <option [value]="2">2 / trang</option>
+            <option [value]="3">3 / trang</option>
+            <option [value]="5">5 / trang</option>
+            <option [value]="10">10 / trang</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="historyCurrentPage <= 1"
+          (click)="changeHistoryPage(historyCurrentPage - 1)"
+          title="Trang trước"
+        >
+          ‹
+        </button>
+        @for (p of historyPages; track p) {
+          <button
+            type="button"
+            class="page-btn"
+            [class.active]="p === historyCurrentPage"
+            (click)="changeHistoryPage(p)"
+          >
+            {{ p }}
+          </button>
+        }
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="historyCurrentPage >= historyTotalPages"
+          (click)="changeHistoryPage(historyCurrentPage + 1)"
+          title="Trang sau"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+    }
+    }
+  </section>
+  }
+
+  <!-- TAB 3: HỒ SƠ CÁ NHÂN -->
+  @if (mode === 'profile') {
+  <div class="profile-layout">
+    <!-- CỘT 1: THÔNG TIN HỌC VỤ & LIÊN HỆ -->
+    <div class="profile-col-main">
+      <!-- Profile Identity Hero Card -->
+      <div class="profile-hero-card">
+        <div class="hero-avatar-wrapper">
+          <div class="hero-avatar">
+            <span>{{ studentInitials }}</span>
+          </div>
+          <span class="hero-status-dot" title="Tài khoản sinh viên đang hoạt động"></span>
+        </div>
+        <div class="hero-details">
+          <div class="hero-role-tag">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+            <span>Sinh Viên Chính Quy</span>
+          </div>
+          <h2>{{ profile?.hoTen || 'Sinh viên' }}</h2>
+          <div class="hero-badges">
+            <span class="badge-mssv">MSV: {{ profile?.mssv || '---' }}</span>
+            <span class="badge-class">{{ profile?.lopTen || '---' }}</span>
+            <span class="badge-faculty">{{ profile?.khoaTen || '---' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Academic Information Grid -->
+      <section class="portal-card profile-card">
+        <div class="card-header">
+          <div class="header-with-icon">
+            <div class="header-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <div>
+              <h2>Thông Tin Cá Nhân & Học Tập</h2>
+              <p class="subtitle">Dữ liệu hồ sơ sinh viên được đồng bộ trực tiếp từ Phòng Đào tạo & Quản lý sinh viên
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-info-grid">
+          <div class="info-item">
+            <span class="label">Mã số sinh viên (MSV)</span>
+            <span class="value mssv-highlight">{{ profile?.mssv || '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Họ và tên</span>
+            <span class="value text-bold">{{ profile?.hoTen || '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Lớp hành chính</span>
+            <span class="value">{{ profile?.lopTen || '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Khoa / Viện chuyên trách</span>
+            <span class="value">{{ profile?.khoaTen || '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Giới tính</span>
+            <span class="value">{{ profile?.gioiTinh || '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Ngày sinh</span>
+            <span class="value">{{ profile?.ngaySinh ? (profile?.ngaySinh | date: 'dd/MM/yyyy') : '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Ngày nhập học</span>
+            <span class="value">{{ profile?.ngayNhapHoc ? (profile?.ngayNhapHoc | date: 'dd/MM/yyyy') : '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Email liên hệ</span>
+            <span class="value email-link">{{ profile?.email || '---' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Số điện thoại liên hệ</span>
+            <span class="value">{{ profile?.soDienThoai || 'Chưa cập nhật' }}</span>
+          </div>
+
+          <div class="info-item full-width-info">
+            <span class="label">Địa chỉ thường trú / Nơi ở hiện tại</span>
+            <span class="value address-highlight">{{ profile?.diaChi || 'Chưa cập nhật' }}</span>
+          </div>
+        </div>
+
+        <!-- Contact Update Form -->
+        <div class="edit-contact-section">
+          <div class="section-title-box">
+            <div class="section-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+            </div>
+            <div>
+              <h3>Cập nhật thông tin liên hệ cá nhân</h3>
+              <p>Thông tin này dùng để nhận thông báo khẩn cấp, kết quả rèn luyện và học bổng từ Nhà trường</p>
+            </div>
+          </div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="contact-form">
+            <div class="contact-form-grid">
+              <div class="form-row">
+                <label>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                  Email liên hệ:
+                </label>
+                <input type="text" formControlName="email" placeholder="Nhập địa chỉ email..." />
+                @if (profileForm.get('email')?.touched && profileForm.get('email')?.invalid) {
+                  <span class="form-error">Email bắt buộc và phải có định dạng hợp lệ</span>
+                }
+              </div>
+
+              <div class="form-row">
+                <label>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                      d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                  Số điện thoại di động:
+                </label>
+                <input type="tel" formControlName="soDienThoai" placeholder="0912 345 678" />
+                @if (profileForm.get('soDienThoai')?.touched && profileForm.get('soDienThoai')?.invalid) {
+                  <span class="form-error">Số điện thoại không hợp lệ (từ 8 đến 20 số)</span>
+                }
+              </div>
+            </div>
+
+            <div class="form-row full-width">
+              <label>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Địa chỉ thường trú / Nơi ở hiện tại:
+              </label>
+              <input type="text" formControlName="diaChi"
+                placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..." />
+              @if (profileForm.get('diaChi')?.touched && profileForm.get('diaChi')?.invalid) {
+                <span class="form-error">Địa chỉ không được vượt quá 255 ký tự</span>
+              }
+            </div>
+
+            @if (contactFeedback) {
+              <div
+                class="contact-feedback"
+                [class.feedback-success]="contactFeedback.type === 'success'"
+                [class.feedback-error]="contactFeedback.type === 'error'"
+              >
+                @if (contactFeedback.type === 'success') {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                } @else {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                }
+                <span>{{ contactFeedback.text }}</span>
+              </div>
+            }
+
+            <div class="form-actions-right">
+              <button type="submit" class="btn-save-contact" [disabled]="savingProfile">
+                @if (savingProfile) {
+                <div class="btn-spinner"></div>
+                <span>Đang lưu...</span>
+                } @else {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                <span>Lưu thông tin liên hệ</span>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <!-- CỘT 2: ĐỔI MẬT KHẨU & BẢO MẬT TÀI KHOẢN -->
+    <div class="profile-col-side">
+      <section class="portal-card security-card">
+        <div class="card-header">
+          <div class="header-with-icon">
+            <div class="header-icon-box security-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <div>
+              <h2>Đổi Mật Khẩu Đăng Nhập</h2>
+              <p class="subtitle">Bảo vệ quyền riêng tư & thông tin học vụ</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-card-body">
+          <div class="security-tip-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>Mật khẩu mới tối thiểu 6 ký tự. Nên kết hợp chữ, số và ký tự đặc biệt để an toàn nhất.</span>
+          </div>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="password-form">
+            <div class="form-row">
+              <label>Mật khẩu hiện tại: <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <input type="password" formControlName="oldPassword" placeholder="Nhập mật khẩu đang dùng"
+                  autocomplete="current-password" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label>Mật khẩu mới: <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <input type="password" formControlName="newPassword" placeholder="Tối thiểu 6 ký tự"
+                  autocomplete="new-password" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label>Xác nhận mật khẩu mới: <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <input type="password" formControlName="confirmPassword" placeholder="Nhập lại mật khẩu mới"
+                  autocomplete="new-password" />
+              </div>
+            </div>
+
+            <div class="password-actions">
+              <button type="submit" class="btn-update-pwd" [disabled]="changingPassword">
+                @if (changingPassword) {
+                <div class="btn-spinner"></div>
+                <span>Đang cập nhật...</span>
+                } @else {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <span>Cập nhật mật khẩu ngay</span>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+  }
+</div>

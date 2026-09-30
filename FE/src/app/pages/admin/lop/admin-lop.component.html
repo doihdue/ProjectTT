@@ -1,0 +1,184 @@
+<section class="admin-page">
+  <header class="page-header">
+    <div class="header-info">
+      <span class="eyebrow">Quản lý đào tạo</span>
+      <h1>Quản lý Lớp hành chính</h1>
+      <p>Quản lý tổ chức lớp hành chính theo khóa và khoa chuyên môn trực thuộc.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="secondary-button" (click)="loadLops()">⟳ Làm mới</button>
+    </div>
+  </header>
+
+  @if (successMessage) {
+  <div class="alert alert-success">{{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+  }
+
+  <div class="admin-layout">
+    <!-- Form Panel -->
+    <aside class="form-card">
+      <div class="form-header">
+        <h3>{{ editingId === null ? 'Thêm mới lớp hành chính' : 'Cập nhật lớp hành chính' }}</h3>
+        <p>{{ editingId === null ? 'Điền thông tin lớp hành chính mới' : 'Chỉnh sửa thông tin lớp hành chính đã chọn' }}
+        </p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label>Thuộc Khoa <span class="req">*</span></label>
+          <select formControlName="khoaId">
+            <option value="">-- Chọn Khoa --</option>
+            @for (k of khoas; track k.id) {
+            <option [value]="k.id">{{ k.tenKhoa }} ({{ k.maKhoa }})</option>
+            }
+          </select>
+          @if (form.get('khoaId')?.touched && form.get('khoaId')?.invalid) {
+          <small class="error-text">Vui lòng chọn Khoa.</small>
+          }
+        </div>
+
+        @if (editingId !== null) {
+        <div class="form-group">
+          <label>Mã lớp hành chính (Cố định)</label>
+          <input type="text" [value]="form.get('maLop')?.value" readonly class="input-readonly" />
+        </div>
+        }
+
+        <div class="form-group">
+          <label>Tên lớp hành chính <span class="req">*</span></label>
+          <input type="text" formControlName="tenLop" placeholder="VD: Công nghệ thông tin 01 - Khóa 2022" />
+          @if (form.get('tenLop')?.touched && form.get('tenLop')?.invalid) {
+          <small class="error-text">Tên lớp hành chính là bắt buộc.</small>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Niên khóa <span class="req">*</span></label>
+            <input type="text" formControlName="nienKhoa" placeholder="VD: 2022-2026" />
+          </div>
+
+          <div class="form-group">
+            <label>Sĩ số tối đa <span class="req">*</span></label>
+            <input type="number" formControlName="siSoToiDa" min="1" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="active" />
+            <span>Trạng thái đang hoạt động</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button" [disabled]="saving">
+            {{ saving ? 'Đang lưu...' : editingId === null ? 'Thêm mới' : 'Lưu cập nhật' }}
+          </button>
+          @if (editingId !== null) {
+          <button type="button" class="cancel-button" (click)="resetForm()">Hủy sửa</button>
+          }
+        </div>
+      </form>
+    </aside>
+
+    <!-- Table List Panel -->
+    <article class="table-card">
+      <div class="table-toolbar">
+        <div class="filter-group">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [(ngModel)]="searchText" (ngModelChange)="onFilterChange()" placeholder="Tìm theo mã lớp, tên lớp, niên khóa..." />
+          </div>
+
+          <select [(ngModel)]="filterKhoaId" (ngModelChange)="onFilterChange()" class="filter-select">
+            <option value="">Tất cả các Khoa</option>
+            @for (k of khoas; track k.id) {
+            <option [value]="k.id">{{ k.tenKhoa }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="list-summary">
+          <span>Tổng số: <strong>{{ filteredLops.length }}</strong> lớp hành chính</span>
+        </div>
+      </div>
+
+      @if (loading) {
+      <div class="empty-state">Đang tải dữ liệu lớp hành chính...</div>
+      } @else if (filteredLops.length === 0) {
+      <div class="empty-state">Không tìm thấy lớp hành chính nào phù hợp.</div>
+      } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã lớp HC</th>
+              <th>Tên lớp hành chính</th>
+              <th>Niên khóa</th>
+              <th>Sĩ số</th>
+              <th>Khoa</th>
+              <th>Trạng thái</th>
+              <th class="text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lop of paginatedLops; track lop.id) {
+            <tr>
+              <td>
+                <span class="code-badge">{{ lop.maLop }}</span>
+              </td>
+              <td>
+                <strong>{{ lop.tenLop }}</strong>
+              </td>
+              <td>{{ lop.nienKhoa }}</td>
+              <td>{{ lop.siSoToiDa }} SV</td>
+              <td>{{ lop.khoaTen || '-' }}</td>
+              <td>
+                <span [class]="lop.active ? 'badge-active' : 'badge-inactive'">
+                  {{ lop.active ? 'Hoạt động' : 'Tạm khóa' }}
+                </span>
+              </td>
+              <td class="text-right actions-cell">
+                <button type="button" class="btn-edit" (click)="edit(lop)">Sửa</button>
+                <button type="button" class="btn-delete" (click)="remove(lop)">Xóa</button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Thanh phân trang rõ ràng -->
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          <span>Hiển thị <strong>{{ startIndex + 1 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ filteredLops.length }}</strong> lớp</span>
+          <div class="page-size-wrap">
+            <label>Mỗi trang:</label>
+            <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
+              <option [value]="50">50</option>
+            </select>
+          </div>
+        </div>
+        <div class="pagination-controls">
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)" title="Trang đầu">«</button>
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" title="Trang trước">‹</button>
+          
+          @for (p of visiblePages; track p) {
+            <button type="button" class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+          }
+          
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" title="Trang sau">›</button>
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)" title="Trang cuối">»</button>
+        </div>
+      </div>
+      }
+    </article>
+  </div>
+</section>

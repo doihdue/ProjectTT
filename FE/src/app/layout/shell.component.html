@@ -1,0 +1,181 @@
+<div class="shell">
+  <!-- Backdrop che phủ màn hình khi mở menu trên mobile -->
+  @if (mobileSidebarOpen) {
+    <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+  }
+
+  <!-- THANH MENU BÊN TRÁI (SIDEBAR) - CỐ ĐỊNH, KHÔNG BỊ CUỘN THEO NỘI DUNG -->
+  <aside class="sidebar" [class.mobile-open]="mobileSidebarOpen">
+    <!-- Header Logo & Brand -->
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      <div class="brand-info">
+        <h1>QLSV Portal</h1>
+        <span>Hệ thống Quản lý Đào tạo</span>
+      </div>
+    </div>
+
+    <!-- Danh sách Menu Điều Hướng (Cuộn độc lập nếu danh sách dài) -->
+    <nav class="menu">
+      @for (group of navGroups; track group.title) {
+        <div class="menu-group">
+          <span class="group-title">{{ group.title }}</span>
+          <div class="group-items">
+            @for (item of group.items; track item.path) {
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                class="menu-link"
+                (click)="closeSidebar()"
+              >
+                @if (item.icon) {
+                  <span class="link-icon">{{ item.icon }}</span>
+                }
+                <span class="link-label">{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </nav>
+
+    <!-- Nút Đăng xuất ở cuối Menu -->
+    <div class="sidebar-footer">
+      <button type="button" class="logout-btn" (click)="logout()" title="Đăng xuất khỏi hệ thống">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Đăng xuất</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- KHU VỰC NỘI DUNG CHÍNH (CONTENT WRAPPER) -->
+  <div class="content-wrapper">
+    <!-- THANH HEADER TRÊN CÙNG (TOPBAR) - CỐ ĐỊNH Ở ĐỈNH, KHÔNG BỊ CUỘN THEO -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          class="menu-toggle-btn"
+          (click)="toggleSidebar()"
+          aria-label="Đóng mở menu"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="page-title-badge">
+          <span class="status-indicator-dot"></span>
+          <span>Cổng thông tin Đào tạo & Quản lý Sinh viên</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Huy hiệu trạng thái hệ thống gọn gàng -->
+        <div class="system-status-chip">
+          <span class="pulse-dot"></span>
+          <span>Hệ thống trực tuyến</span>
+        </div>
+
+        <!-- Chuông thông báo (RabbitMQ) -->
+        <div class="notification-container">
+          <button
+            type="button"
+            class="notification-btn"
+            (click)="toggleNotifications()"
+            aria-label="Thông báo"
+            title="Xem thông báo hệ thống"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            @if (unreadCount > 0) {
+              <span class="bell-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+            }
+          </button>
+
+          <!-- Dropdown thông báo -->
+          @if (showNotifications) {
+            <div class="notification-dropdown">
+              <div class="dropdown-header">
+                <div class="title-row">
+                  <h3>Thông báo</h3>
+                  <span class="unread-pill">{{ unreadCount }} mới</span>
+                </div>
+                @if (notifications.length > 0) {
+                  <button type="button" class="btn-mark-all" (click)="markAllRead()">Đánh dấu đã đọc</button>
+                }
+              </div>
+
+              <div class="dropdown-body">
+                @if (loadingNotifications && notifications.length === 0) {
+                  <div class="loading-noti">
+                    <div class="spinner-small"></div>
+                    <span>Đang tải thông báo...</span>
+                  </div>
+                } @else if (notifications.length === 0) {
+                  <div class="empty-noti">
+                    <span class="empty-icon">📭</span>
+                    <p>Bạn không có thông báo nào mới.</p>
+                  </div>
+                } @else {
+                  <div class="noti-list">
+                    @for (item of notifications; track item.id) {
+                      <div
+                        class="noti-item"
+                        [class.unread]="!item.daDoc"
+                        (click)="handleNotificationClick(item)"
+                      >
+                        <div class="noti-icon-box">
+                          @switch (item.loaiThongBao) {
+                            @case ('DIEM_MOI') { <span>📊</span> }
+                            @case ('DUYET_DIEM') { <span>✅</span> }
+                            @case ('TU_CHOI_DIEM') { <span>⚠️</span> }
+                            @default { <span>📢</span> }
+                          }
+                        </div>
+                        <div class="noti-content">
+                          <div class="noti-title">{{ item.tieuDe }}</div>
+                          <div class="noti-desc">{{ item.noiDung }}</div>
+                          <div class="noti-time">{{ item.thoiGianTao | date: 'dd/MM/yyyy HH:mm' }}</div>
+                        </div>
+                        @if (!item.daDoc) {
+                          <span class="unread-dot"></span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Thông tin tài khoản người dùng -->
+        <div class="user-pill">
+          <div class="avatar">{{ userInitials }}</div>
+          <div class="user-meta">
+            <strong class="user-name">{{ currentUserName }}</strong>
+            <span class="user-role">{{ currentUserRole }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- NỘI DUNG TRANG (VIEWPORT) - VÙNG DUY NHẤT CUỘN TRANG -->
+    <main class="viewport">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

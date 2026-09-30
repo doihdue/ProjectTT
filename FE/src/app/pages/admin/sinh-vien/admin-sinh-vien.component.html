@@ -1,0 +1,243 @@
+<section class="admin-page">
+  <header class="page-header">
+    <div class="header-info">
+      <span class="eyebrow">Quản lý đào tạo</span>
+      <h1>Quản lý Hồ sơ Sinh viên</h1>
+      <p>Thông tin lý lịch học viên, lớp hành chính, khoa đào tạo và tình trạng học tập.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="secondary-button" (click)="loadSinhViens()">⟳ Làm mới</button>
+    </div>
+  </header>
+
+  <div class="tip-banner">
+    <span class="tip-icon">💡</span>
+    <span>
+      Quy tắc tài khoản sinh viên: Tên đăng nhập là <strong>MSSV</strong> (VD: <code>2022CNTT001</code>). Mật khẩu mặc
+      định
+      là <strong>ngày sinh dạng <code>ddMMyyyy</code></strong> (VD: sinh ngày 05/08/2003 thì mật khẩu là
+      <code>05082003</code>). Nếu không có ngày sinh, mật khẩu là <code>student123</code>. Bạn có thể bấm <strong>"🔑
+        Cấp lại MK"</strong> ở bảng danh sách để cấp lại mật khẩu ngay cho sinh viên.
+    </span>
+  </div>
+
+  @if (successMessage) {
+  <div class="alert alert-success">{{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+  }
+
+  <div class="admin-layout">
+    <!-- Form Panel -->
+    <aside class="form-card">
+      <div class="form-header">
+        <h3>{{ editingId === null ? 'Thêm mới sinh viên' : 'Cập nhật sinh viên' }}</h3>
+        <p>{{ editingId === null ? 'Điền thông tin hồ sơ sinh viên' : 'Chỉnh sửa sinh viên đã chọn' }}</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label>Lớp hành chính <span class="req">*</span></label>
+          <select formControlName="lopId">
+            <option value="">-- Chọn Lớp hành chính --</option>
+            @for (l of lops; track l.id) {
+            <option [value]="l.id">{{ l.tenLop }} ({{ l.maLop }})</option>
+            }
+          </select>
+          @if (form.get('lopId')?.touched && form.get('lopId')?.invalid) {
+          <small class="error-text">Vui lòng chọn Lớp hành chính.</small>
+          }
+        </div>
+
+        @if (editingId !== null) {
+        <div class="form-row">
+          <div class="form-group">
+            <label>MSSV (Cố định)</label>
+            <input type="text" [value]="form.get('mssv')?.value" readonly class="input-readonly" />
+          </div>
+          <div class="form-group">
+            <label>Email sinh viên (Cố định)</label>
+            <input type="text" [value]="form.get('email')?.value" readonly class="input-readonly" />
+          </div>
+        </div>
+        }
+
+        <div class="form-group">
+          <label>Họ và tên <span class="req">*</span></label>
+          <input type="text" formControlName="hoTen" placeholder="VD: Trần Hoàng Long" />
+          @if (form.get('hoTen')?.touched && form.get('hoTen')?.invalid) {
+          <small class="error-text">Họ tên là bắt buộc.</small>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Giới tính</label>
+            <select formControlName="gioiTinh">
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Ngày sinh</label>
+            <input type="date" formControlName="ngaySinh" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngày nhập học</label>
+            <input type="date" formControlName="ngayNhapHoc" />
+          </div>
+
+          <div class="form-group">
+            <label>Số điện thoại</label>
+            <input type="text" formControlName="soDienThoai" placeholder="0987654321" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Địa chỉ thường trú</label>
+          <input type="text" formControlName="diaChi" placeholder="Quận / Huyện, Tỉnh / Thành phố" />
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="active" />
+            <span>Đang theo học (Tài khoản kích hoạt)</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button" [disabled]="saving">
+            {{ saving ? 'Đang lưu...' : editingId === null ? 'Thêm mới' : 'Lưu cập nhật' }}
+          </button>
+          @if (editingId !== null) {
+          <button type="button" class="cancel-button" (click)="resetForm()">Hủy sửa</button>
+          }
+        </div>
+      </form>
+    </aside>
+
+    <!-- Table List Panel -->
+    <article class="table-card">
+      <div class="table-toolbar">
+        <div class="filter-group">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [(ngModel)]="searchText" (ngModelChange)="onFilterChange()" placeholder="Tìm theo MSSV, họ tên, email, SĐT..." />
+          </div>
+
+          <select [(ngModel)]="filterLopId" (ngModelChange)="onFilterChange()" class="filter-select">
+            <option value="">Tất cả Lớp hành chính</option>
+            @for (l of lops; track l.id) {
+            <option [value]="l.id">{{ l.tenLop }}</option>
+            }
+          </select>
+
+          <select [(ngModel)]="filterGender" (ngModelChange)="onFilterChange()" class="filter-select">
+            <option value="">Tất cả giới tính</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+          </select>
+        </div>
+
+        <div class="list-summary">
+          <span>Tổng số: <strong>{{ filteredSinhViens.length }}</strong> sinh viên</span>
+        </div>
+      </div>
+
+      @if (loading) {
+      <div class="empty-state">Đang tải danh sách sinh viên...</div>
+      } @else if (filteredSinhViens.length === 0) {
+      <div class="empty-state">Không tìm thấy sinh viên nào phù hợp.</div>
+      } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>MSSV</th>
+              <th>Họ và tên</th>
+              <th>Giới tính</th>
+              <th>Ngày sinh</th>
+              <th>Lớp hành chính</th>
+              <th>Khoa</th>
+              <th>Email</th>
+              <th>Số điện thoại</th>
+              <th>Trạng thái</th>
+              <th class="text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (sv of paginatedSinhViens; track sv.id) {
+            <tr>
+              <td>
+                <div class="mssv-cell">
+                  <span class="code-badge">{{ sv.mssv }}</span>
+                  @if (getCohort(sv)) {
+                    <span class="cohort-badge">{{ getCohort(sv) }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <strong class="student-name">{{ sv.hoTen }}</strong>
+              </td>
+              <td class="text-nowrap">{{ sv.gioiTinh || '-' }}</td>
+              <td class="text-nowrap">{{ sv.ngaySinh ? (sv.ngaySinh | date: 'dd/MM/yyyy') : '-' }}</td>
+              <td>
+                <span class="class-badge">{{ sv.lopTen || '-' }}</span>
+              </td>
+              <td>{{ sv.khoaTen || '-' }}</td>
+              <td>
+                <a [href]="'mailto:' + sv.email" class="email-link">{{ sv.email }}</a>
+              </td>
+              <td class="text-nowrap">{{ sv.soDienThoai || '-' }}</td>
+              <td>
+                <span [class]="sv.active ? 'badge-active' : 'badge-inactive'">
+                  {{ sv.active ? 'Đang học' : 'Nghỉ' }}
+                </span>
+              </td>
+              <td class="text-right actions-cell">
+                <button type="button" class="btn-reset-pw" (click)="resetPassword(sv)"
+                  title="Cấp lại mật khẩu mặc định">🔑 Cấp lại MK</button>
+                <button type="button" class="btn-edit" (click)="edit(sv)">Sửa</button>
+                <button type="button" class="btn-delete" (click)="remove(sv)">Xóa</button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Thanh phân trang rõ ràng -->
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          <span>Hiển thị <strong>{{ startIndex + 1 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ filteredSinhViens.length }}</strong> sinh viên</span>
+          <div class="page-size-wrap">
+            <label>Mỗi trang:</label>
+            <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
+              <option [value]="50">50</option>
+            </select>
+          </div>
+        </div>
+        <div class="pagination-controls">
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)" title="Trang đầu">«</button>
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" title="Trang trước">‹</button>
+          
+          @for (p of visiblePages; track p) {
+            <button type="button" class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+          }
+          
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" title="Trang sau">›</button>
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)" title="Trang cuối">»</button>
+        </div>
+      </div>
+      }
+    </article>
+  </div>
+</section>

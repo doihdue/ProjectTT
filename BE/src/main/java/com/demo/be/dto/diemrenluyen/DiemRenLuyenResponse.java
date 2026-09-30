@@ -1,0 +1,39 @@
+package com.demo.be.dto.diemrenluyen;
+
+import java.time.LocalDateTime;
+
+public record DiemRenLuyenResponse(
+        Long id,
+        Long sinhVienId,
+        String mssv,
+        String hoTen,
+        String email,
+        Long lopId,
+        String tenLop,
+        Long khoaId,
+        String tenKhoa,
+        Long dotDanhGiaId,
+        String tenDot,
+        Integer hocKy,
+        String namHoc,
+        Integer tieuChi1Sv,
+        Integer tieuChi2Sv,
+        Integer tieuChi3Sv,
+        Integer tieuChi4Sv,
+        Integer tieuChi5Sv,
+        Integer tongDiemSv,
+        Integer tieuChi1Admin,
+        Integer tieuChi2Admin,
+        Integer tieuChi3Admin,
+        Integer tieuChi4Admin,
+        Integer tieuChi5Admin,
+        Integer tongDiemAdmin,
+        String xepLoai,
+        String ghiChuSinhVien,
+        String minhChung,
+        String nhanXetAdmin,
+        String trangThai,
+        LocalDateTime ngayNop,
+        LocalDateTime ngayDuyet,
+        String nguoiDuyet
+) {}

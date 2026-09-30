@@ -1,0 +1,43 @@
+<section class="login-page">
+  <div class="hero">
+    <p class="eyebrow">Hệ thống quản lý sinh viên</p>
+    <h1>Đăng nhập vào cổng điều hành học vụ.</h1>
+    <p>
+      Điều phối khoa, lớp, sinh viên và đánh giá điểm rèn luyện trên một
+      giao diện có phân quyền rõ ràng.
+    </p>
+  </div>
+
+  <form class="panel" [formGroup]="form" (ngSubmit)="submit()">
+    <div>
+      <h2>Đăng nhập</h2>
+      <p>Dành cho Quản trị viên và Sinh viên</p>
+    </div>
+
+    <label>
+      Tên đăng nhập
+      <input formControlName="username" type="text" placeholder="admin hoặc MSSV (VD: 2022CNTT001)" />
+      @if (form.controls.username.touched && form.controls.username.hasError('required')) {
+      <small>Vui lòng nhập tên đăng nhập.</small>
+      }
+    </label>
+
+    <label>
+      Mật khẩu
+      <input formControlName="password" type="password" placeholder="Nhập mật khẩu (Mặc định SV: ngày sinh ddMMyyyy)" />
+      @if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+      <small>Mật khẩu phải có ít nhất 6 ký tự.</small>
+      }
+      @if (form.controls.password.hasError('invalidCredentials')) {
+      <small>Tên đăng nhập hoặc mật khẩu không đúng.</small>
+      }
+    </label>
+
+    <label class="checkbox">
+      <input formControlName="remember" type="checkbox" />
+      Ghi nhớ phiên đăng nhập
+    </label>
+
+    <button type="submit">Đăng nhập</button>
+  </form>
+</section>
