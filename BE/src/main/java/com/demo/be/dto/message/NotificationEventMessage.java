@@ -29,5 +29,5 @@ public class NotificationEventMessage implements Serializable {
     private String link;
 
     @Builder.Default
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private String timestamp = LocalDateTime.now().toString();
 }

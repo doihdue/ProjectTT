@@ -10,13 +10,6 @@
     </div>
   </header>
 
-  @if (successMessage) {
-    <div class="alert alert-success">{{ successMessage }}</div>
-  }
-  @if (errorMessage) {
-    <div class="alert alert-danger">{{ errorMessage }}</div>
-  }
-
   <div class="admin-layout">
     <!-- Form Panel -->
     <aside class="form-card">
@@ -30,7 +23,15 @@
           <label>Mã khoa <span class="req">*</span></label>
           <input type="text" formControlName="maKhoa" placeholder="VD: CNTT, DTVT, KTXD" />
           @if (form.get('maKhoa')?.touched && form.get('maKhoa')?.invalid) {
-            <small class="error-text">Mã khoa là bắt buộc (tối đa 20 ký tự).</small>
+            @if (form.get('maKhoa')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('maKhoa')?.errors?.['serverError'] }}</small>
+            } @else if (form.get('maKhoa')?.errors?.['duplicate']) {
+              <small class="error-text">Mã khoa này đã tồn tại trong hệ thống.</small>
+            } @else if (form.get('maKhoa')?.errors?.['maxlength']) {
+              <small class="error-text">Mã khoa tối đa 20 ký tự (bạn đang nhập {{ form.get('maKhoa')?.value?.length }} ký tự).</small>
+            } @else if (form.get('maKhoa')?.errors?.['required']) {
+              <small class="error-text">Mã khoa không được để trống.</small>
+            }
           }
         </div>
 
@@ -38,13 +39,28 @@
           <label>Tên khoa <span class="req">*</span></label>
           <input type="text" formControlName="tenKhoa" placeholder="VD: Công nghệ thông tin" />
           @if (form.get('tenKhoa')?.touched && form.get('tenKhoa')?.invalid) {
-            <small class="error-text">Tên khoa là bắt buộc.</small>
+            @if (form.get('tenKhoa')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('tenKhoa')?.errors?.['serverError'] }}</small>
+            } @else if (form.get('tenKhoa')?.errors?.['duplicate']) {
+              <small class="error-text">Tên khoa này đã tồn tại trong hệ thống.</small>
+            } @else if (form.get('tenKhoa')?.errors?.['maxlength']) {
+              <small class="error-text">Tên khoa tối đa 150 ký tự.</small>
+            } @else if (form.get('tenKhoa')?.errors?.['required']) {
+              <small class="error-text">Tên khoa không được để trống.</small>
+            }
           }
         </div>
 
         <div class="form-group">
           <label>Mô tả đơn vị</label>
           <textarea formControlName="moTa" rows="3" placeholder="Mô tả ngành đào tạo, định hướng..."></textarea>
+          @if (form.get('moTa')?.touched && form.get('moTa')?.invalid) {
+            @if (form.get('moTa')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('moTa')?.errors?.['serverError'] }}</small>
+            } @else {
+              <small class="error-text">Mô tả tối đa 500 ký tự.</small>
+            }
+          }
         </div>
 
         <div class="form-group">
@@ -73,21 +89,21 @@
             <span class="search-icon">🔍</span>
             <input
               type="text"
-              [(ngModel)]="searchText"
-              (ngModelChange)="onFilterChange()"
+              [ngModel]="searchText"
+              (ngModelChange)="onSearchInput($event)"
               placeholder="Tìm theo mã khoa, tên khoa, mô tả..."
             />
           </div>
         </div>
 
         <div class="list-summary">
-          <span>Tổng số: <strong>{{ filteredKhoas.length }}</strong> khoa</span>
+          <span>Tổng số: <strong>{{ totalElements }}</strong> khoa</span>
         </div>
       </div>
 
       @if (loading) {
         <div class="empty-state">Đang tải danh sách khoa...</div>
-      } @else if (filteredKhoas.length === 0) {
+      } @else if (khoas.length === 0) {
         <div class="empty-state">Không tìm thấy khoa nào phù hợp.</div>
       } @else {
         <div class="table-container">
@@ -102,7 +118,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (khoa of paginatedKhoas; track khoa.id) {
+              @for (khoa of khoas; track khoa.id) {
                 <tr>
                   <td>
                     <span class="code-badge">{{ khoa.maKhoa }}</span>
@@ -129,7 +145,7 @@
         <!-- Thanh phân trang rõ ràng -->
         <div class="pagination-bar">
           <div class="pagination-info">
-            <span>Hiển thị <strong>{{ startIndex + 1 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ filteredKhoas.length }}</strong> khoa</span>
+            <span>Hiển thị <strong>{{ totalElements > 0 ? startIndex + 1 : 0 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ totalElements }}</strong> khoa</span>
             <div class="page-size-wrap">
               <label>Mỗi trang:</label>
               <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">

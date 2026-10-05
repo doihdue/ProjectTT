@@ -4,11 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record ChangePasswordRequest(
-        @NotBlank(message = "Old password is required")
+        @NotBlank(message = "Mật khẩu hiện tại không được để trống")
         String oldPassword,
 
-        @NotBlank(message = "New password is required")
-        @Size(min = 6, message = "New password must be at least 6 characters")
+        @NotBlank(message = "Mật khẩu mới không được để trống")
+        @Size(min = 6, message = "Mật khẩu mới phải có ít nhất 6 ký tự")
         String newPassword
 ) {
 }

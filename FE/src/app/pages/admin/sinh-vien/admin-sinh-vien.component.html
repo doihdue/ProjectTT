@@ -21,13 +21,6 @@
     </span>
   </div>
 
-  @if (successMessage) {
-  <div class="alert alert-success">{{ successMessage }}</div>
-  }
-  @if (errorMessage) {
-  <div class="alert alert-danger">{{ errorMessage }}</div>
-  }
-
   <div class="admin-layout">
     <!-- Form Panel -->
     <aside class="form-card">
@@ -46,7 +39,11 @@
             }
           </select>
           @if (form.get('lopId')?.touched && form.get('lopId')?.invalid) {
-          <small class="error-text">Vui lòng chọn Lớp hành chính.</small>
+            @if (form.get('lopId')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('lopId')?.errors?.['serverError'] }}</small>
+            } @else {
+              <small class="error-text">Vui lòng chọn Lớp học.</small>
+            }
           }
         </div>
 
@@ -55,10 +52,16 @@
           <div class="form-group">
             <label>MSSV (Cố định)</label>
             <input type="text" [value]="form.get('mssv')?.value" readonly class="input-readonly" />
+            @if (form.get('mssv')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('mssv')?.errors?.['serverError'] }}</small>
+            }
           </div>
           <div class="form-group">
             <label>Email sinh viên (Cố định)</label>
             <input type="text" [value]="form.get('email')?.value" readonly class="input-readonly" />
+            @if (form.get('email')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('email')?.errors?.['serverError'] }}</small>
+            }
           </div>
         </div>
         }
@@ -67,7 +70,13 @@
           <label>Họ và tên <span class="req">*</span></label>
           <input type="text" formControlName="hoTen" placeholder="VD: Trần Hoàng Long" />
           @if (form.get('hoTen')?.touched && form.get('hoTen')?.invalid) {
-          <small class="error-text">Họ tên là bắt buộc.</small>
+            @if (form.get('hoTen')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('hoTen')?.errors?.['serverError'] }}</small>
+            } @else if (form.get('hoTen')?.errors?.['maxlength']) {
+              <small class="error-text">Họ tên tối đa 150 ký tự.</small>
+            } @else if (form.get('hoTen')?.errors?.['required']) {
+              <small class="error-text">Họ tên sinh viên không được để trống.</small>
+            }
           }
         </div>
 
@@ -78,11 +87,25 @@
               <option value="Nam">Nam</option>
               <option value="Nữ">Nữ</option>
             </select>
+            @if (form.get('gioiTinh')?.touched && form.get('gioiTinh')?.invalid) {
+              @if (form.get('gioiTinh')?.errors?.['serverError']) {
+                <small class="error-text">{{ form.get('gioiTinh')?.errors?.['serverError'] }}</small>
+              }
+            }
           </div>
 
           <div class="form-group">
-            <label>Ngày sinh</label>
-            <input type="date" formControlName="ngaySinh" />
+            <label>Ngày sinh <span class="req">*</span></label>
+            <input type="date" formControlName="ngaySinh" [max]="todayDate" />
+            @if (form.get('ngaySinh')?.touched && form.get('ngaySinh')?.invalid) {
+              @if (form.get('ngaySinh')?.errors?.['serverError']) {
+                <small class="error-text">{{ form.get('ngaySinh')?.errors?.['serverError'] }}</small>
+              } @else if (form.get('ngaySinh')?.errors?.['futureDate']) {
+                <small class="error-text">Ngày sinh phải là một ngày trong quá khứ.</small>
+              } @else if (form.get('ngaySinh')?.errors?.['required']) {
+                <small class="error-text">Ngày sinh không được để trống.</small>
+              }
+            }
           </div>
         </div>
 
@@ -90,17 +113,36 @@
           <div class="form-group">
             <label>Ngày nhập học</label>
             <input type="date" formControlName="ngayNhapHoc" />
+            @if (form.get('ngayNhapHoc')?.touched && form.get('ngayNhapHoc')?.invalid) {
+              @if (form.get('ngayNhapHoc')?.errors?.['serverError']) {
+                <small class="error-text">{{ form.get('ngayNhapHoc')?.errors?.['serverError'] }}</small>
+              }
+            }
           </div>
 
           <div class="form-group">
             <label>Số điện thoại</label>
             <input type="text" formControlName="soDienThoai" placeholder="0987654321" />
+            @if (form.get('soDienThoai')?.touched && form.get('soDienThoai')?.invalid) {
+              @if (form.get('soDienThoai')?.errors?.['serverError']) {
+                <small class="error-text">{{ form.get('soDienThoai')?.errors?.['serverError'] }}</small>
+              } @else if (form.get('soDienThoai')?.errors?.['maxlength']) {
+                <small class="error-text">Số điện thoại tối đa 20 ký tự.</small>
+              }
+            }
           </div>
         </div>
 
         <div class="form-group">
           <label>Địa chỉ thường trú</label>
           <input type="text" formControlName="diaChi" placeholder="Quận / Huyện, Tỉnh / Thành phố" />
+          @if (form.get('diaChi')?.touched && form.get('diaChi')?.invalid) {
+            @if (form.get('diaChi')?.errors?.['serverError']) {
+              <small class="error-text">{{ form.get('diaChi')?.errors?.['serverError'] }}</small>
+            } @else if (form.get('diaChi')?.errors?.['maxlength']) {
+              <small class="error-text">Địa chỉ tối đa 255 ký tự.</small>
+            }
+          }
         </div>
 
         <div class="form-group">
@@ -127,7 +169,7 @@
         <div class="filter-group">
           <div class="search-input-wrap">
             <span class="search-icon">🔍</span>
-            <input type="text" [(ngModel)]="searchText" (ngModelChange)="onFilterChange()" placeholder="Tìm theo MSSV, họ tên, email, SĐT..." />
+            <input type="text" [ngModel]="searchText" (ngModelChange)="onSearchInput($event)" placeholder="Tìm theo MSSV, họ tên, email, SĐT, lớp, khoa..." />
           </div>
 
           <select [(ngModel)]="filterLopId" (ngModelChange)="onFilterChange()" class="filter-select">
@@ -145,13 +187,13 @@
         </div>
 
         <div class="list-summary">
-          <span>Tổng số: <strong>{{ filteredSinhViens.length }}</strong> sinh viên</span>
+          <span>Tổng số: <strong>{{ totalElements }}</strong> sinh viên</span>
         </div>
       </div>
 
       @if (loading) {
       <div class="empty-state">Đang tải danh sách sinh viên...</div>
-      } @else if (filteredSinhViens.length === 0) {
+      } @else if (sinhViens.length === 0) {
       <div class="empty-state">Không tìm thấy sinh viên nào phù hợp.</div>
       } @else {
       <div class="table-container">
@@ -171,7 +213,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (sv of paginatedSinhViens; track sv.id) {
+            @for (sv of sinhViens; track sv.id) {
             <tr>
               <td>
                 <div class="mssv-cell">
@@ -214,7 +256,7 @@
       <!-- Thanh phân trang rõ ràng -->
       <div class="pagination-bar">
         <div class="pagination-info">
-          <span>Hiển thị <strong>{{ startIndex + 1 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ filteredSinhViens.length }}</strong> sinh viên</span>
+          <span>Hiển thị <strong>{{ totalElements > 0 ? startIndex + 1 : 0 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ totalElements }}</strong> sinh viên</span>
           <div class="page-size-wrap">
             <label>Mỗi trang:</label>
             <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">

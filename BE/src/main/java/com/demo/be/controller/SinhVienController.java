@@ -1,5 +1,6 @@
 package com.demo.be.controller;
 
+import com.demo.be.dto.common.PageResponse;
 import com.demo.be.dto.sinhvien.SinhVienRequest;
 import com.demo.be.dto.sinhvien.SinhVienResponse;
 import com.demo.be.dto.sinhvien.StudentProfileUpdateRequest;
@@ -36,6 +37,17 @@ public class SinhVienController {
     @GetMapping
     public ResponseEntity<List<SinhVienResponse>> getAll() {
         return ResponseEntity.ok(sinhVienService.findAll());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<SinhVienResponse>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long lopId,
+            @RequestParam(required = false) String gioiTinh,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(sinhVienService.searchAndFilter(keyword, lopId, gioiTinh, page, size));
     }
 
     @GetMapping("/next-mssv")

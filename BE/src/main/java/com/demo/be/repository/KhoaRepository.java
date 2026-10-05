@@ -4,6 +4,6 @@ import com.demo.be.model.Khoa;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface KhoaRepository extends JpaRepository<Khoa, Long> {
+public interface KhoaRepository extends JpaRepository<Khoa, Long>, KhoaRepositoryCustom {
     Optional<Khoa> findByMaKhoa(String maKhoa);
 }

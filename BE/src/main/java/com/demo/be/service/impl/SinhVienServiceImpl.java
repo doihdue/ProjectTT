@@ -1,5 +1,6 @@
 package com.demo.be.service.impl;
 
+import com.demo.be.dto.common.PageResponse;
 import com.demo.be.dto.sinhvien.SinhVienRequest;
 import com.demo.be.dto.sinhvien.SinhVienResponse;
 import com.demo.be.dto.sinhvien.StudentProfileUpdateRequest;
@@ -14,6 +15,9 @@ import com.demo.be.repository.LopRepository;
 import com.demo.be.repository.SinhVienRepository;
 import com.demo.be.repository.UserRepository;
 import com.demo.be.service.SinhVienService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,6 +98,26 @@ public class SinhVienServiceImpl implements SinhVienService {
     @Override
     public List<SinhVienResponse> findAll() {
         return sinhVienRepository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public PageResponse<SinhVienResponse> searchAndFilter(String keyword, Long lopId, String gioiTinh, int page, int size) {
+        int pageNumber = Math.max(0, page);
+        int pageSize = (size > 0 && size <= 100) ? size : 10;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        Page<SinhVien> sinhVienPage = sinhVienRepository.searchAndFilter(keyword, lopId, gioiTinh, pageable);
+        List<SinhVienResponse> content = sinhVienPage.getContent().stream().map(this::toResponse).toList();
+
+        return new PageResponse<>(
+                content,
+                sinhVienPage.getNumber(),
+                sinhVienPage.getSize(),
+                sinhVienPage.getTotalElements(),
+                sinhVienPage.getTotalPages(),
+                sinhVienPage.isFirst(),
+                sinhVienPage.isLast()
+        );
     }
 
     @Override

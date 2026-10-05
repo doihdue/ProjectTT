@@ -186,3 +186,49 @@ select {
     }
   }
 }
+
+/* ==========================================================================
+   Khung trường nhập liệu bị lỗi (Gạch đỏ dọc nổi bật ở cạnh trái)
+   Áp dụng trên toàn bộ hệ thống (Sinh viên, Khoa, Lớp, ĐRL, Cổng Sinh viên...)
+   ========================================================================== */
+input:not([type="checkbox"]):not([type="radio"]).ng-invalid.ng-touched,
+input:not([type="checkbox"]):not([type="radio"]).ng-invalid.ng-dirty,
+input:not([type="checkbox"]):not([type="radio"]).is-invalid,
+select.ng-invalid.ng-touched,
+select.ng-invalid.ng-dirty,
+select.is-invalid,
+textarea.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-dirty,
+textarea.is-invalid {
+  border: 1px solid #fca5a5 !important;
+  border-left: 6px solid #dc2626 !important;
+  background-color: #fff5f5 !important;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08) !important;
+  transition: border-color 0.2s ease, border-left 0.2s ease, background-color 0.2s ease !important;
+
+  &:focus {
+    border-color: #dc2626 !important;
+    border-left: 6px solid #b91c1c !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18) !important;
+    outline: none !important;
+  }
+}
+
+/* Nhãn trường có lỗi chuyển sang màu đỏ tinh tế */
+.form-group:has(.ng-invalid.ng-touched) > label,
+.form-group:has(.ng-invalid.ng-dirty) > label {
+  color: #b91c1c !important;
+}
+
+/* Thông điệp lỗi dưới ô input */
+.error-text {
+  color: #dc2626 !important;
+  font-size: 0.8rem !important;
+  margin-top: 4px !important;
+  display: block !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+}
+
+

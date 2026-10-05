@@ -5,13 +5,13 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record StudentProfileUpdateRequest(
-        @NotBlank(message = "Email is required")
-        @Pattern(regexp = "^[^\\s@]+@[^\\s@]+$", message = "Email is invalid")
-        @Size(max = 150, message = "Email must be at most 150 characters")
+        @NotBlank(message = "Email không được để trống")
+        @Pattern(regexp = "^[^\\s@]+@[^\\s@]+$", message = "Email không đúng định dạng")
+        @Size(max = 150, message = "Email tối đa 150 ký tự")
         String email,
-        @Size(max = 20, message = "So dien thoai must be at most 20 characters")
+        @Size(max = 20, message = "Số điện thoại tối đa 20 ký tự")
         String soDienThoai,
-        @Size(max = 255, message = "Dia chi must be at most 255 characters")
+        @Size(max = 255, message = "Địa chỉ tối đa 255 ký tự")
         String diaChi
 ) {
 }

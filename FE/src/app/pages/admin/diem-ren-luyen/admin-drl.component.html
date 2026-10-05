@@ -4,40 +4,37 @@
     <div class="header-left">
       <span class="header-badge">Học vụ & Rèn luyện</span>
       <h1>Quản lý & Phê duyệt Điểm Rèn Luyện</h1>
-      <p class="subtitle">Quản lý các đợt đánh giá, xem xét đánh giá 5 tiêu chuẩn rèn luyện, phê chuẩn điểm và gửi thông báo kết quả cho sinh viên</p>
+      <p class="subtitle">Quản lý các đợt đánh giá, xem xét đánh giá 5 tiêu chuẩn rèn luyện, phê chuẩn điểm và gửi thông
+        báo kết quả cho sinh viên</p>
     </div>
     <div class="header-actions">
       @if (activeTab === 'drl') {
-        <button
-          type="button"
-          class="btn-export-pdf"
-          (click)="exportSummaryPdf()"
-          [disabled]="exportingSummary || drlList.length === 0"
-          title="Xuất bảng tổng hợp kết quả điểm rèn luyện ra file PDF bằng JasperReports"
-        >
-          @if (exportingSummary) {
-            <span class="btn-spinner-sm"></span>
-            <span>Đang tạo PDF...</span>
-          } @else {
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-              <polyline points="10 9 9 9 8 9" />
-            </svg>
-            <span>Xuất Báo Cáo PDF</span>
-          }
-        </button>
+      <button type="button" class="btn-export-pdf" (click)="exportSummaryPdf()"
+        [disabled]="exportingSummary || drlList.length === 0"
+        title="Xuất bảng tổng hợp kết quả điểm rèn luyện ra file PDF bằng JasperReports">
+        @if (exportingSummary) {
+        <span class="btn-spinner-sm"></span>
+        <span>Đang tạo PDF...</span>
+        } @else {
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+        <span>Xuất Báo Cáo PDF</span>
+        }
+      </button>
       }
       @if (activeTab === 'dot') {
-        <button class="btn-create-dot" (click)="openCreateDotModal()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Tạo đợt đánh giá mới
-        </button>
+      <button class="btn-create-dot" (click)="openCreateDotModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Tạo đợt đánh giá mới
+      </button>
       }
       <button class="btn-refresh" (click)="loadDrlList(); loadDots(); loadThongKe()" [disabled]="loading">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -48,51 +45,22 @@
     </div>
   </div>
 
-  <!-- Alerts -->
-  @if (successMessage) {
-    <div class="alert alert-success">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-        <polyline points="22 4 12 14.01 9 11.01" />
-      </svg>
-      <span>{{ successMessage }}</span>
-    </div>
-  }
-
-  @if (errorMessage) {
-    <div class="alert alert-danger">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-      <span>{{ errorMessage }}</span>
-    </div>
-  }
+  <!-- Tab Switcher Navigation -->
 
   <!-- Tab Switcher Navigation -->
   <div class="admin-tab-nav">
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab === 'drl'"
-      (click)="activeTab = 'drl'"
-    >
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'drl'" (click)="activeTab = 'drl'">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <path
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
       <span>Danh sách Phiếu rèn luyện</span>
       @if (thongKe.soChoDuyet > 0) {
-        <span class="tab-badge warning">{{ thongKe.soChoDuyet }} chờ duyệt</span>
+      <span class="tab-badge warning">{{ thongKe.soChoDuyet }} chờ duyệt</span>
       }
     </button>
 
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab === 'dot'"
-      (click)="activeTab = 'dot'"
-    >
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'dot'" (click)="activeTab = 'dot'">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
         <line x1="16" y1="2" x2="16" y2="6" />
@@ -106,987 +74,938 @@
 
   <!-- ================= TAB 1: DANH SÁCH PHIẾU RÈN LUYỆN ================= -->
   @if (activeTab === 'drl') {
-    <!-- Stats Metric Cards -->
-    <div class="stats-grid">
-      <div class="stat-card total">
-        <div class="stat-icon">📄</div>
-        <div class="stat-info">
-          <span class="stat-label">Tổng số phiếu</span>
-          <span class="stat-value">{{ thongKe.tongSoPhieu }}</span>
-        </div>
+  <!-- Stats Metric Cards -->
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-icon">📄</div>
+      <div class="stat-info">
+        <span class="stat-label">Tổng số phiếu</span>
+        <span class="stat-value">{{ thongKe.tongSoPhieu }}</span>
       </div>
-      <div class="stat-card pending" [class.pulse]="thongKe.soChoDuyet > 0">
-        <div class="stat-icon">⏳</div>
-        <div class="stat-info">
-          <span class="stat-label">Chờ phê duyệt</span>
-          <span class="stat-value">{{ thongKe.soChoDuyet }}</span>
-        </div>
+    </div>
+    <div class="stat-card pending" [class.pulse]="thongKe.soChoDuyet > 0">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-info">
+        <span class="stat-label">Chờ phê duyệt</span>
+        <span class="stat-value">{{ thongKe.soChoDuyet }}</span>
       </div>
-      <div class="stat-card approved">
-        <div class="stat-icon">✅</div>
-        <div class="stat-info">
-          <span class="stat-label">Đã phê duyệt</span>
-          <span class="stat-value">{{ thongKe.soDaDuyet }}</span>
-        </div>
+    </div>
+    <div class="stat-card approved">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <span class="stat-label">Đã phê duyệt</span>
+        <span class="stat-value">{{ thongKe.soDaDuyet }}</span>
       </div>
-      <div class="stat-card rejected">
-        <div class="stat-icon">⚠️</div>
-        <div class="stat-info">
-          <span class="stat-label">Yêu cầu sửa / Từ chối</span>
-          <span class="stat-value">{{ thongKe.soTuChoi }}</span>
+    </div>
+    <div class="stat-card rejected">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-info">
+        <span class="stat-label">Yêu cầu sửa / Từ chối</span>
+        <span class="stat-value">{{ thongKe.soTuChoi }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-card">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Đợt đánh giá:</label>
+        <select [(ngModel)]="filterDotId" (change)="loadDrlList()">
+          <option value="">Tất cả các đợt</option>
+          @for (d of dotList; track d.id) {
+          <option [value]="d.id">
+            {{ d.tenDot }} ({{ d.trangThai === 'DANG_MO' ? 'Đang mở' : 'Đã đóng' }})
+          </option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Khoa:</label>
+        <select [(ngModel)]="filterKhoaId" (change)="onKhoaChange()">
+          <option value="">Tất cả các Khoa</option>
+          @for (k of khoas; track k.id) {
+          <option [value]="k.id">{{ k.tenKhoa }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Lớp hành chính:</label>
+        <select [(ngModel)]="filterLopId" (change)="loadDrlList()">
+          <option value="">Tất cả các Lớp</option>
+          @for (l of filteredLops; track l.id) {
+          <option [value]="l.id">{{ l.tenLop }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Trạng thái:</label>
+        <select [(ngModel)]="filterTrangThai" (change)="loadDrlList()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="CHO_DUYET">Chờ phê duyệt</option>
+          <option value="DA_DUYET">Đã phê duyệt</option>
+          <option value="TU_CHOI">Bị từ chối</option>
+        </select>
+      </div>
+
+      <div class="filter-group search">
+        <label>Tìm kiếm sinh viên:</label>
+        <div class="search-input-box">
+          <input type="text" placeholder="Nhập MSSV hoặc Họ tên..." [(ngModel)]="filterKeyword"
+            (keyup.enter)="loadDrlList()" />
+          <button type="button" (click)="loadDrlList()">Tìm</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Filter Bar -->
-    <div class="filter-card">
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>Đợt đánh giá:</label>
-          <select [(ngModel)]="filterDotId" (change)="loadDrlList()">
-            <option value="">Tất cả các đợt</option>
-            @for (d of dotList; track d.id) {
-              <option [value]="d.id">
-                {{ d.tenDot }} ({{ d.trangThai === 'DANG_MO' ? 'Đang mở' : 'Đã đóng' }})
-              </option>
-            }
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label>Khoa:</label>
-          <select [(ngModel)]="filterKhoaId" (change)="onKhoaChange()">
-            <option value="">Tất cả các Khoa</option>
-            @for (k of khoas; track k.id) {
-              <option [value]="k.id">{{ k.tenKhoa }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label>Lớp hành chính:</label>
-          <select [(ngModel)]="filterLopId" (change)="loadDrlList()">
-            <option value="">Tất cả các Lớp</option>
-            @for (l of filteredLops; track l.id) {
-              <option [value]="l.id">{{ l.tenLop }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label>Trạng thái:</label>
-          <select [(ngModel)]="filterTrangThai" (change)="loadDrlList()">
-            <option value="">Tất cả trạng thái</option>
-            <option value="CHO_DUYET">Chờ phê duyệt</option>
-            <option value="DA_DUYET">Đã phê duyệt</option>
-            <option value="TU_CHOI">Bị từ chối</option>
-          </select>
-        </div>
-
-        <div class="filter-group search">
-          <label>Tìm kiếm sinh viên:</label>
-          <div class="search-input-box">
-            <input
-              type="text"
-              placeholder="Nhập MSSV hoặc Họ tên..."
-              [(ngModel)]="filterKeyword"
-              (keyup.enter)="loadDrlList()"
-            />
-            <button type="button" (click)="loadDrlList()">Tìm</button>
-          </div>
-        </div>
-      </div>
+  <!-- Table Container -->
+  <div class="table-container">
+    @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Đang tải danh sách phiếu đánh giá điểm rèn luyện...</p>
     </div>
-
-    <!-- Table Container -->
-    <div class="table-container">
-      @if (loading) {
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <p>Đang tải danh sách phiếu đánh giá điểm rèn luyện...</p>
-        </div>
-      } @else if (drlList.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <h3>Không có phiếu đánh giá rèn luyện nào</h3>
-          <p>Không tìm thấy bản ghi phù hợp với điều kiện lọc hiện tại.</p>
-        </div>
-      } @else {
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Sinh viên</th>
-              <th>Lớp & Khoa</th>
-              <th>Đợt đánh giá / Kỳ</th>
-              <th>SV Tự chấm</th>
-              <th>Duyệt / Xếp loại</th>
-              <th>Trạng thái</th>
-              <th>Ngày nộp</th>
-              <th class="text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of paginatedDrlList; track item.id; let idx = $index) {
-              <tr>
-                <td>{{ startIndex + idx + 1 }}</td>
-                <td>
-                  <div class="student-cell">
-                    <span class="student-name">{{ item.hoTen }}</span>
-                    <span class="student-mssv">MSSV: {{ item.mssv }}</span>
-                  </div>
-                </td>
-                <td>
-                  <div class="class-cell">
-                    <span class="class-name">{{ item.tenLop || '---' }}</span>
-                    <span class="faculty-name">{{ item.tenKhoa || '---' }}</span>
-                  </div>
-                </td>
-                <td>
-                  <div class="dot-cell">
-                    <span class="dot-name">{{ item.tenDot || ('Học kỳ ' + item.hocKy + ' (' + item.namHoc + ')') }}</span>
-                    <span class="semester-tag">HK{{ item.hocKy }} - {{ item.namHoc }}</span>
-                  </div>
-                </td>
-                <td>
-                  <div class="score-self">
-                    <span class="score-num">{{ item.tongDiemSv }}</span>
-                    <span class="score-max">/100</span>
-                  </div>
-                </td>
-                <td>
-                  @if (item.trangThai === 'DA_DUYET') {
-                    <div class="approved-score-cell">
-                      <span class="approved-points">{{ item.tongDiemAdmin }}đ</span>
-                      <span class="rank-badge" [ngClass]="getXepLoaiClass(item.xepLoai)">{{ formatXepLoai(item.xepLoai) }}</span>
-                    </div>
-                  } @else {
-                    <span class="pending-text">Chưa duyệt (Dự kiến: {{ formatXepLoai(item.xepLoai) }})</span>
-                  }
-                </td>
-                <td>
-                  <span class="badge" [ngClass]="getBadgeClass(item.trangThai)">
-                    {{ getTrangThaiText(item.trangThai) }}
-                  </span>
-                </td>
-                <td>
-                  <span class="date-text">{{ item.ngayNop | date: 'dd/MM/yyyy HH:mm' }}</span>
-                </td>
-                <td class="text-right">
-                  <div class="action-btn-group">
-                    <button
-                      type="button"
-                      class="btn-action-pdf"
-                      (click)="exportPhieuPdf(item)"
-                      [disabled]="exportingPdfId === item.id"
-                      title="Xuất phiếu kết quả ĐRL của sinh viên này ra file PDF (JasperReports)"
-                    >
-                      @if (exportingPdfId === item.id) {
-                        <span class="btn-spinner-sm"></span>
-                      } @else {
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                          <polyline points="14 2 14 8 20 8"/>
-                          <path d="M12 18v-6m0 6l-3-3m3 3l3-3"/>
-                        </svg>
-                      }
-                      <span>Phiếu PDF</span>
-                    </button>
-                    <button
-                      type="button"
-                      class="btn-action-primary"
-                      [class.btn-action-pending]="item.trangThai === 'CHO_DUYET'"
-                      (click)="openDuyetModal(item)"
-                      [title]="item.trangThai === 'CHO_DUYET' ? 'Xét duyệt phiếu điểm rèn luyện' : 'Xem chi tiết & Chỉnh sửa điểm'"
-                    >
-                      @if (item.trangThai === 'CHO_DUYET') {
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                          <path d="M9 11l3 3L22 4" />
-                          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-                        </svg>
-                        <span>Duyệt phiếu</span>
-                      } @else {
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                        <span>Xem / Sửa</span>
-                      }
-                    </button>
-                    <button
-                      type="button"
-                      class="btn-action-danger"
-                      (click)="deleteDrl(item)"
-                      title="Xóa phiếu đánh giá này"
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-
-        <!-- Thanh phân trang rõ ràng -->
-        <div class="pagination-bar">
-          <div class="pagination-info">
-            <span>Hiển thị <strong>{{ startIndex + 1 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{ drlList.length }}</strong> phiếu ĐRL</span>
-            <div class="page-size-wrap">
-              <label>Mỗi trang:</label>
-              <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-                <option [value]="5">5</option>
-                <option [value]="10">10</option>
-                <option [value]="20">20</option>
-                <option [value]="50">50</option>
-              </select>
+    } @else if (drlList.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📂</div>
+      <h3>Không có phiếu đánh giá rèn luyện nào</h3>
+      <p>Không tìm thấy bản ghi phù hợp với điều kiện lọc hiện tại.</p>
+    </div>
+    } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Sinh viên</th>
+          <th>Lớp & Khoa</th>
+          <th>Đợt đánh giá / Kỳ</th>
+          <th>SV Tự chấm</th>
+          <th>Duyệt / Xếp loại</th>
+          <th>Trạng thái</th>
+          <th>Ngày nộp</th>
+          <th class="text-right">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of paginatedDrlList; track item.id; let idx = $index) {
+        <tr>
+          <td>{{ startIndex + idx + 1 }}</td>
+          <td>
+            <div class="student-cell">
+              <span class="student-name">{{ item.hoTen }}</span>
+              <span class="student-mssv">MSSV: {{ item.mssv }}</span>
             </div>
-          </div>
-          <div class="pagination-controls">
-            <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)" title="Trang đầu">«</button>
-            <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" title="Trang trước">‹</button>
-            
-            @for (p of visiblePages; track p) {
-              <button type="button" class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+          </td>
+          <td>
+            <div class="class-cell">
+              <span class="class-name">{{ item.tenLop || '---' }}</span>
+              <span class="faculty-name">{{ item.tenKhoa || '---' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="dot-cell">
+              <span class="dot-name">{{ item.tenDot || ('Học kỳ ' + item.hocKy + ' (' + item.namHoc + ')') }}</span>
+              <span class="semester-tag">HK{{ item.hocKy }} - {{ item.namHoc }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="score-self">
+              <span class="score-num">{{ item.tongDiemSv }}</span>
+              <span class="score-max">/100</span>
+            </div>
+          </td>
+          <td>
+            @if (item.trangThai === 'DA_DUYET') {
+            <div class="approved-score-cell">
+              <span class="approved-points">{{ item.tongDiemAdmin }}đ</span>
+              <span class="rank-badge" [ngClass]="getXepLoaiClass(item.xepLoai)">{{ formatXepLoai(item.xepLoai)
+                }}</span>
+            </div>
+            } @else {
+            <span class="pending-text">Chưa duyệt (Dự kiến: {{ formatXepLoai(item.xepLoai) }})</span>
             }
-            
-            <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" title="Trang sau">›</button>
-            <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)" title="Trang cuối">»</button>
-          </div>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getBadgeClass(item.trangThai)">
+              {{ getTrangThaiText(item.trangThai) }}
+            </span>
+          </td>
+          <td>
+            <span class="date-text">{{ item.ngayNop | date: 'dd/MM/yyyy HH:mm' }}</span>
+          </td>
+          <td class="text-right">
+            <div class="action-btn-group">
+              <button type="button" class="btn-action-pdf" (click)="exportPhieuPdf(item)"
+                [disabled]="exportingPdfId === item.id"
+                title="Xuất phiếu kết quả ĐRL của sinh viên này ra file PDF (JasperReports)">
+                @if (exportingPdfId === item.id) {
+                <span class="btn-spinner-sm"></span>
+                } @else {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <path d="M12 18v-6m0 6l-3-3m3 3l3-3" />
+                </svg>
+                }
+                <span>Phiếu PDF</span>
+              </button>
+              <button type="button" class="btn-action-primary"
+                [class.btn-action-pending]="item.trangThai === 'CHO_DUYET'" (click)="openDuyetModal(item)"
+                [title]="item.trangThai === 'CHO_DUYET' ? 'Xét duyệt phiếu điểm rèn luyện' : 'Xem chi tiết & Chỉnh sửa điểm'">
+                @if (item.trangThai === 'CHO_DUYET') {
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                </svg>
+                <span>Duyệt phiếu</span>
+                } @else {
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <span>Xem / Sửa</span>
+                }
+              </button>
+              <button type="button" class="btn-action-danger" (click)="deleteDrl(item)" title="Xóa phiếu đánh giá này">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Thanh phân trang rõ ràng -->
+    <div class="pagination-bar">
+      <div class="pagination-info">
+        <span>Hiển thị <strong>{{ startIndex + 1 }}</strong> - <strong>{{ endIndex }}</strong> / <strong>{{
+            drlList.length }}</strong> phiếu ĐRL</span>
+        <div class="page-size-wrap">
+          <label>Mỗi trang:</label>
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
         </div>
-      }
+      </div>
+      <div class="pagination-controls">
+        <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(1)"
+          title="Trang đầu">«</button>
+        <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)"
+          title="Trang trước">‹</button>
+
+        @for (p of visiblePages; track p) {
+        <button type="button" class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <button type="button" class="page-btn" [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)" title="Trang sau">›</button>
+        <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)"
+          title="Trang cuối">»</button>
+      </div>
     </div>
+    }
+  </div>
   }
 
   <!-- ================= TAB 2: QUẢN LÝ ĐỢT ĐÁNH GIÁ ================= -->
   @if (activeTab === 'dot') {
-    <div class="table-container">
-      <div class="table-toolbar">
-        <div class="toolbar-info">
-          <h3>Danh sách các Đợt Đánh Giá Điểm Rèn Luyện</h3>
-          <p>Sinh viên chỉ có thể chấm điểm khi Đợt đánh giá đang ở trạng thái <strong>"Đang mở"</strong>.</p>
-        </div>
-        <button class="btn-create-dot" (click)="openCreateDotModal()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Tạo đợt đánh giá mới
-        </button>
+  <div class="table-container">
+    <div class="table-toolbar">
+      <div class="toolbar-info">
+        <h3>Danh sách các Đợt Đánh Giá Điểm Rèn Luyện</h3>
+        <p>Sinh viên chỉ có thể chấm điểm khi Đợt đánh giá đang ở trạng thái <strong>"Đang mở"</strong>.</p>
       </div>
-
-      @if (dotList.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">📅</div>
-          <h3>Chưa có đợt đánh giá nào</h3>
-          <p>Hãy tạo đợt đánh giá mới và mở để sinh viên có thể tham gia tự đánh giá điểm rèn luyện.</p>
-          <button class="btn-primary-inline" (click)="openCreateDotModal()">➕ Tạo đợt ngay</button>
-        </div>
-      } @else {
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Tên Đợt Đánh Giá</th>
-              <th>Học kỳ / Năm</th>
-              <th>Thời gian mở & Hạn nộp</th>
-              <th>Số phiếu đã nộp</th>
-              <th>Trạng thái</th>
-              <th>Ghi chú</th>
-              <th class="text-right">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (dot of dotList; track dot.id; let idx = $index) {
-              <tr>
-                <td>{{ idx + 1 }}</td>
-                <td>
-                  <strong class="dot-title">{{ dot.tenDot }}</strong>
-                </td>
-                <td>
-                  <span class="semester-tag">HK{{ dot.hocKy }} ({{ dot.namHoc }})</span>
-                </td>
-                <td>
-                  <div class="date-range">
-                    <span>Từ: {{ dot.ngayBatDau ? (dot.ngayBatDau | date: 'dd/MM/yyyy') : '---' }}</span>
-                    <span>Đến: {{ dot.ngayKetThuc ? (dot.ngayKetThuc | date: 'dd/MM/yyyy') : 'Chưa giới hạn' }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="badge badge-info">{{ dot.soLuongPhieu }} phiếu</span>
-                </td>
-                <td>
-                  @if (dot.trangThai === 'DANG_MO') {
-                    <span class="badge badge-open">🟢 Đang mở</span>
-                  } @else {
-                    <span class="badge badge-closed">🔒 Đã đóng</span>
-                  }
-                </td>
-                <td>
-                  <span class="note-text">{{ dot.ghiChu || '---' }}</span>
-                </td>
-                <td class="text-right">
-                  <div class="action-btn-group">
-                    <!-- Toggle Mở / Đóng -->
-                    @if (dot.trangThai === 'DANG_MO') {
-                      <button
-                        type="button"
-                        class="btn-toggle-close"
-                        (click)="toggleDotStatus(dot)"
-                        title="Đóng đợt (Sinh viên sẽ không nộp được nữa)"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                        <span>Đóng đợt</span>
-                      </button>
-                    } @else {
-                      <button
-                        type="button"
-                        class="btn-toggle-open"
-                        (click)="toggleDotStatus(dot)"
-                        title="Mở đợt (Cho phép sinh viên tham gia đánh giá)"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                          <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
-                        </svg>
-                        <span>Mở đợt</span>
-                      </button>
-                    }
-
-                    <button
-                      type="button"
-                      class="btn-action-edit"
-                      (click)="openEditDotModal(dot)"
-                      title="Chỉnh sửa thông tin đợt đánh giá"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 20h9"/>
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                      </svg>
-                      <span>Sửa</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      class="btn-action-danger"
-                      (click)="deleteDot(dot)"
-                      title="Xóa đợt đánh giá này"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
+      <button class="btn-create-dot" (click)="openCreateDotModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Tạo đợt đánh giá mới
+      </button>
     </div>
+
+    @if (dotList.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📅</div>
+      <h3>Chưa có đợt đánh giá nào</h3>
+      <p>Hãy tạo đợt đánh giá mới và mở để sinh viên có thể tham gia tự đánh giá điểm rèn luyện.</p>
+      <button class="btn-primary-inline" (click)="openCreateDotModal()">➕ Tạo đợt ngay</button>
+    </div>
+    } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Tên Đợt Đánh Giá</th>
+          <th>Học kỳ / Năm</th>
+          <th>Thời gian mở & Hạn nộp</th>
+          <th>Số phiếu đã nộp</th>
+          <th>Trạng thái</th>
+          <th>Ghi chú</th>
+          <th class="text-right">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (dot of dotList; track dot.id; let idx = $index) {
+        <tr>
+          <td>{{ idx + 1 }}</td>
+          <td>
+            <strong class="dot-title">{{ dot.tenDot }}</strong>
+          </td>
+          <td>
+            <span class="semester-tag">HK{{ dot.hocKy }} ({{ dot.namHoc }})</span>
+          </td>
+          <td>
+            <div class="date-range">
+              <span>Từ: {{ dot.ngayBatDau ? (dot.ngayBatDau | date: 'dd/MM/yyyy') : '---' }}</span>
+              <span>Đến: {{ dot.ngayKetThuc ? (dot.ngayKetThuc | date: 'dd/MM/yyyy') : 'Chưa giới hạn' }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="badge badge-info">{{ dot.soLuongPhieu }} phiếu</span>
+          </td>
+          <td>
+            @if (dot.trangThai === 'DANG_MO') {
+            <span class="badge badge-open">🟢 Đang mở</span>
+            } @else {
+            <span class="badge badge-closed">🔒 Đã đóng</span>
+            }
+          </td>
+          <td>
+            <span class="note-text">{{ dot.ghiChu || '---' }}</span>
+          </td>
+          <td class="text-right">
+            <div class="action-btn-group">
+              <!-- Toggle Mở / Đóng -->
+              @if (dot.trangThai === 'DANG_MO') {
+              <button type="button" class="btn-toggle-close" (click)="toggleDotStatus(dot)"
+                title="Đóng đợt (Sinh viên sẽ không nộp được nữa)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>Đóng đợt</span>
+              </button>
+              } @else {
+              <button type="button" class="btn-toggle-open" (click)="toggleDotStatus(dot)"
+                title="Mở đợt (Cho phép sinh viên tham gia đánh giá)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                </svg>
+                <span>Mở đợt</span>
+              </button>
+              }
+
+              <button type="button" class="btn-action-edit" (click)="openEditDotModal(dot)"
+                title="Chỉnh sửa thông tin đợt đánh giá">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                <span>Sửa</span>
+              </button>
+
+              <button type="button" class="btn-action-danger" (click)="deleteDot(dot)" title="Xóa đợt đánh giá này">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    }
+  </div>
   }
 
   <!-- ================= MODAL TẠO / SỬA ĐỢT ĐÁNH GIÁ ================= -->
   @if (showDotModal) {
-    <div class="modal-backdrop" (click)="closeDotModal()">
-      <div class="modal-content modal-dot" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <div class="modal-title-with-icon">
-            <div class="modal-header-icon dot-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-            </div>
-            <div>
-              <h2>{{ selectedDot ? 'Chỉnh Sửa Đợt Đánh Giá ĐRL' : 'Tạo Đợt Đánh Giá ĐRL Mới' }}</h2>
-              <p class="modal-subtitle">Thiết lập thời gian và quy chế tự đánh giá điểm rèn luyện cho sinh viên</p>
-            </div>
-          </div>
-          <button type="button" class="btn-close" (click)="closeDotModal()" title="Đóng cửa sổ">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+  <div class="modal-backdrop" (click)="closeDotModal()">
+    <div class="modal-content modal-dot" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <div class="modal-header-icon dot-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-          </button>
+          </div>
+          <div>
+            <h2>{{ selectedDot ? 'Chỉnh Sửa Đợt Đánh Giá ĐRL' : 'Tạo Đợt Đánh Giá ĐRL Mới' }}</h2>
+            <p class="modal-subtitle">Thiết lập thời gian và quy chế tự đánh giá điểm rèn luyện cho sinh viên</p>
+          </div>
         </div>
+        <button type="button" class="btn-close" (click)="closeDotModal()" title="Đóng cửa sổ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
 
-        <form [formGroup]="dotForm" (ngSubmit)="saveDot()" class="modal-body dot-form">
-          <div class="form-grid-2">
-            <div class="form-row">
-              <label>Học kỳ: <span class="required">*</span></label>
-              <select formControlName="hocKy">
-                <option [value]="1">Học kỳ 1</option>
-                <option [value]="2">Học kỳ 2</option>
-                <option [value]="3">Học kỳ hè</option>
-              </select>
-            </div>
-
-            <div class="form-row">
-              <label>Năm học: <span class="required">*</span></label>
-              <input
-                type="text"
-                formControlName="namHoc"
-                placeholder="VD: 2026-2027"
-              />
-            </div>
-          </div>
-
+      <form [formGroup]="dotForm" (ngSubmit)="saveDot()" class="modal-body dot-form">
+        <div class="form-grid-2">
           <div class="form-row">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <label style="margin: 0;">Tên đợt đánh giá: <span class="required">*</span></label>
-              <button
-                type="button"
-                (click)="regenerateTenDot()"
-                style="background: none; border: none; color: #2563eb; font-size: 0.78rem; font-weight: 600; cursor: pointer;"
-              >
-                🔄 Tự động đặt tên theo Học kỳ & Năm học
-              </button>
-            </div>
-            <input
-              type="text"
-              formControlName="tenDot"
-              placeholder="VD: Đánh giá ĐRL Học kỳ 1 (2026 - 2027)"
-            />
-            <small class="field-hint">Tên đợt tự động đồng bộ theo Học kỳ và Năm học đã chọn</small>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-row">
-              <label>Ngày bắt đầu mở đợt:</label>
-              <input type="date" formControlName="ngayBatDau" />
-            </div>
-
-            <div class="form-row">
-              <label>Hạn chót kết thúc đợt:</label>
-              <input type="date" formControlName="ngayKetThuc" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <label>Trạng thái kích hoạt đợt: <span class="required">*</span></label>
-            <select formControlName="trangThai" class="status-select">
-              <option value="DANG_MO">🟢 Đang mở (Cho phép sinh viên tham gia đánh giá)</option>
-              <option value="DONG">🔒 Đóng (Tạm hoãn / Khóa chưa cho đánh giá)</option>
+            <label>Học kỳ: <span class="required">*</span></label>
+            <select formControlName="hocKy">
+              <option [value]="1">Học kỳ 1</option>
+              <option [value]="2">Học kỳ 2</option>
+              <option [value]="3">Học kỳ hè</option>
             </select>
           </div>
 
           <div class="form-row">
-            <label>Ghi chú & Hướng dẫn sinh viên:</label>
-            <textarea
-              rows="3"
-              formControlName="ghiChu"
-              placeholder="Nhập thông báo, mốc thời gian nộp minh chứng hoặc quy định đặc biệt cho sinh viên trong đợt này..."
-            ></textarea>
+            <label>Năm học: <span class="required">*</span></label>
+            <input type="text" formControlName="namHoc" placeholder="VD: 2026-2027" />
+            @if ((dotForm.get('namHoc')?.touched && dotForm.get('namHoc')?.invalid) || (dotForm.get('namHoc')?.touched
+            && isNamHocInvalid)) {
+            <small class="error-text" style="color: #dc2626; font-size: 0.8rem; margin-top: 4px; display: block;">
+              @if (dotForm.get('namHoc')?.errors?.['required']) {
+              Năm học không được để trống.
+              } @else if (dotForm.get('namHoc')?.errors?.['pattern']) {
+              Năm học phải theo đúng định dạng YYYY-YYYY (ví dụ: 2026-2027).
+              } @else {
+              Năm kết thúc phải sau năm bắt đầu đúng 1 năm (ví dụ: 2026-2027).
+              }
+            </small>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label style="margin: 0;">Tên đợt đánh giá: <span class="required">*</span></label>
+            <button type="button" (click)="regenerateTenDot()"
+              style="background: none; border: none; color: #2563eb; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+              🔄 Tự động đặt tên theo Học kỳ & Năm học
+            </button>
+          </div>
+          <input type="text" formControlName="tenDot" placeholder="VD: Đánh giá ĐRL Học kỳ 1 (2026 - 2027)" />
+          @if (dotForm.get('tenDot')?.touched && dotForm.get('tenDot')?.invalid) {
+          <small class="error-text" style="color: #dc2626; font-size: 0.8rem; margin-top: 4px; display: block;">
+            @if (dotForm.get('tenDot')?.errors?.['maxlength']) {
+            Tên đợt đánh giá tối đa 150 ký tự.
+            } @else {
+            Tên đợt đánh giá không được để trống.
+            }
+          </small>
+          } @else {
+          <small class="field-hint">Tên đợt tự động đồng bộ theo Học kỳ và Năm học đã chọn</small>
+          }
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label>Ngày bắt đầu mở đợt: <span class="required">*</span></label>
+            <input type="date" formControlName="ngayBatDau" />
+            @if (dotForm.get('ngayBatDau')?.touched && dotForm.get('ngayBatDau')?.invalid) {
+            <small class="error-text" style="color: #dc2626; font-size: 0.8rem; margin-top: 4px; display: block;">
+              Thời gian bắt đầu mở đợt không được để trống.
+            </small>
+            }
           </div>
 
-          <div class="modal-footer">
-            <button type="button" class="btn-cancel" (click)="closeDotModal()" [disabled]="savingDot">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-              <span>Hủy bỏ</span>
-            </button>
-            <button type="submit" class="btn-primary" [disabled]="savingDot">
-              @if (savingDot) {
-                <div class="btn-spinner"></div>
-                <span>Đang lưu...</span>
-              } @else {
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                  <polyline points="17 21 17 13 7 13 7 21"/>
-                  <polyline points="7 3 7 8 15 8"/>
-                </svg>
-                <span>{{ selectedDot ? 'Lưu thay đổi' : 'Tạo đợt đánh giá ngay' }}</span>
-              }
-            </button>
+          <div class="form-row">
+            <label>Hạn chót kết thúc đợt: <span class="required">*</span></label>
+            <input type="date" formControlName="ngayKetThuc" [min]="dotForm.get('ngayBatDau')?.value || ''" />
+            @if (dotForm.get('ngayKetThuc')?.touched && dotForm.get('ngayKetThuc')?.invalid) {
+            <small class="error-text" style="color: #dc2626; font-size: 0.8rem; margin-top: 4px; display: block;">
+              Hạn chót kết thúc đợt không được để trống.
+            </small>
+            } @else if (dotForm.get('ngayKetThuc')?.touched && isEndDateInvalid) {
+            <small class="error-text" style="color: #dc2626; font-size: 0.8rem; margin-top: 4px; display: block;">
+              Thời gian kết thúc đợt phải sau ngày bắt đầu mở đợt.
+            </small>
+            }
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="form-row">
+          <label>Trạng thái kích hoạt đợt: <span class="required">*</span></label>
+          <select formControlName="trangThai" class="status-select">
+            <option value="DANG_MO">🟢 Đang mở (Cho phép sinh viên tham gia đánh giá)</option>
+            <option value="DONG">🔒 Đóng (Tạm hoãn / Khóa chưa cho đánh giá)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>Ghi chú & Hướng dẫn sinh viên:</label>
+          <textarea rows="3" formControlName="ghiChu"
+            placeholder="Nhập thông báo, mốc thời gian nộp minh chứng hoặc quy định đặc biệt cho sinh viên trong đợt này..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeDotModal()" [disabled]="savingDot">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            <span>Hủy bỏ</span>
+          </button>
+          <button type="submit" class="btn-primary"
+            [disabled]="savingDot || (dotForm.touched && (isEndDateInvalid || isNamHocInvalid))">
+            @if (savingDot) {
+            <div class="btn-spinner"></div>
+            <span>Đang lưu...</span>
+            } @else {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span>{{ selectedDot ? 'Lưu thay đổi' : 'Tạo đợt đánh giá ngay' }}</span>
+            }
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
   }
 
   <!-- ================= MODAL DUYỆT PHIẾU ĐIỂM RÈN LUYỆN ================= -->
   @if (showModal && selectedDrl) {
-    <div class="modal-backdrop" (click)="closeModal()">
-      <div class="modal-content modal-drl" (click)="$event.stopPropagation()">
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <div class="modal-title-box">
-            <div class="modal-icon-badge">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-            <div>
-              <h2>Xét duyệt Phiếu Điểm Rèn Luyện</h2>
-              <p class="modal-sub">Hội đồng đánh giá và công nhận kết quả rèn luyện của sinh viên</p>
-            </div>
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-content modal-drl" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <div class="modal-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
           </div>
-          <button type="button" class="btn-close" (click)="closeModal()" aria-label="Đóng">✕</button>
-        </div>
-
-        <!-- Student & Evaluation Info Strip Banner -->
-        <div class="student-info-strip">
-          <div class="student-profile-summary">
-            <div class="student-avatar-badge">
-              {{ selectedDrl.hoTen ? selectedDrl.hoTen.slice(0, 1).toUpperCase() : 'S' }}
-            </div>
-            <div class="student-meta">
-              <div class="name-row">
-                <span class="student-name">{{ selectedDrl.hoTen }}</span>
-                <span class="badge-mssv">{{ selectedDrl.mssv }}</span>
-                <span class="badge" [ngClass]="getBadgeClass(selectedDrl.trangThai)">
-                  {{ getTrangThaiText(selectedDrl.trangThai) }}
-                </span>
-              </div>
-              <div class="details-row">
-                <span class="detail-item">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                  </svg>
-                  Lớp: {{ selectedDrl.tenLop }}
-                </span>
-                <span class="sep">•</span>
-                <span class="detail-item">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  </svg>
-                  Khoa: {{ selectedDrl.tenKhoa }}
-                </span>
-                <span class="sep">•</span>
-                <span class="detail-item dot-name">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                  {{ selectedDrl.tenDot || ('Đánh giá ĐRL Học kỳ ' + selectedDrl.hocKy + ' (' + selectedDrl.namHoc + ')') }}
-                </span>
-              </div>
-            </div>
+          <div>
+            <h2>Xét duyệt Phiếu Điểm Rèn Luyện</h2>
+            <p class="modal-sub">Hội đồng đánh giá và công nhận kết quả rèn luyện của sinh viên</p>
           </div>
         </div>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Đóng">✕</button>
+      </div>
 
-        <!-- Modal Body: 2 Columns Side-by-Side Review Grid -->
-        <div class="modal-body modal-scroll">
-          <div class="criteria-review-grid">
-            <!-- Cột trái: Kết quả tự chấm của SV -->
-            <div class="review-col student-side">
-              <div class="col-header student-header">
-                <div class="col-title-group">
-                  <div class="col-icon student-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3>Sinh Viên Tự Đánh Giá</h3>
-                    <span class="col-sub">Kết quả kê khai do sinh viên nộp</span>
-                  </div>
-                </div>
-                <div class="score-pill sv-pill">
-                  <span class="pill-label">Tổng SV:</span>
-                  <strong class="pill-val">{{ selectedDrl.tongDiemSv }}<small>/100đ</small></strong>
-                </div>
-              </div>
-
-              <!-- 5 tiêu chí sinh viên tự đánh giá -->
-              <div class="criteria-list">
-                <!-- TC1 -->
-                <div class="criteria-item">
-                  <div class="c-info">
-                    <div class="c-tag-row">
-                      <span class="c-tag tag-blue">Tiêu chí 1</span>
-                      <span class="c-limit">Tối đa 20đ</span>
-                    </div>
-                    <div class="c-name">Ý thức và kết quả học tập</div>
-                    <div class="c-progress-bar">
-                      <div class="c-progress-fill fill-blue" [style.width.%]="(selectedDrl.tieuChi1Sv / 20) * 100"></div>
-                    </div>
-                  </div>
-                  <div class="c-score-display">
-                    <span class="score-big">{{ selectedDrl.tieuChi1Sv }}</span>
-                    <span class="score-max">/ 20</span>
-                  </div>
-                </div>
-
-                <!-- TC2 -->
-                <div class="criteria-item">
-                  <div class="c-info">
-                    <div class="c-tag-row">
-                      <span class="c-tag tag-purple">Tiêu chí 2</span>
-                      <span class="c-limit">Tối đa 25đ</span>
-                    </div>
-                    <div class="c-name">Chấp hành nội quy, quy chế</div>
-                    <div class="c-progress-bar">
-                      <div class="c-progress-fill fill-purple" [style.width.%]="(selectedDrl.tieuChi2Sv / 25) * 100"></div>
-                    </div>
-                  </div>
-                  <div class="c-score-display">
-                    <span class="score-big">{{ selectedDrl.tieuChi2Sv }}</span>
-                    <span class="score-max">/ 25</span>
-                  </div>
-                </div>
-
-                <!-- TC3 -->
-                <div class="criteria-item">
-                  <div class="c-info">
-                    <div class="c-tag-row">
-                      <span class="c-tag tag-emerald">Tiêu chí 3</span>
-                      <span class="c-limit">Tối đa 20đ</span>
-                    </div>
-                    <div class="c-name">Hoạt động phong trào, tình nguyện</div>
-                    <div class="c-progress-bar">
-                      <div class="c-progress-fill fill-emerald" [style.width.%]="(selectedDrl.tieuChi3Sv / 20) * 100"></div>
-                    </div>
-                  </div>
-                  <div class="c-score-display">
-                    <span class="score-big">{{ selectedDrl.tieuChi3Sv }}</span>
-                    <span class="score-max">/ 20</span>
-                  </div>
-                </div>
-
-                <!-- TC4 -->
-                <div class="criteria-item">
-                  <div class="c-info">
-                    <div class="c-tag-row">
-                      <span class="c-tag tag-amber">Tiêu chí 4</span>
-                      <span class="c-limit">Tối đa 25đ</span>
-                    </div>
-                    <div class="c-name">Phẩm chất công dân & cộng đồng</div>
-                    <div class="c-progress-bar">
-                      <div class="c-progress-fill fill-amber" [style.width.%]="(selectedDrl.tieuChi4Sv / 25) * 100"></div>
-                    </div>
-                  </div>
-                  <div class="c-score-display">
-                    <span class="score-big">{{ selectedDrl.tieuChi4Sv }}</span>
-                    <span class="score-max">/ 25</span>
-                  </div>
-                </div>
-
-                <!-- TC5 -->
-                <div class="criteria-item">
-                  <div class="c-info">
-                    <div class="c-tag-row">
-                      <span class="c-tag tag-indigo">Tiêu chí 5</span>
-                      <span class="c-limit">Tối đa 10đ</span>
-                    </div>
-                    <div class="c-name">Phụ trách lớp & đoàn thể</div>
-                    <div class="c-progress-bar">
-                      <div class="c-progress-fill fill-indigo" [style.width.%]="(selectedDrl.tieuChi5Sv / 10) * 100"></div>
-                    </div>
-                  </div>
-                  <div class="c-score-display">
-                    <span class="score-big">{{ selectedDrl.tieuChi5Sv }}</span>
-                    <span class="score-max">/ 10</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Thẻ xếp loại dự kiến của SV -->
-              <div class="student-rank-row">
-                <span class="rank-title">Dự kiến xếp loại SV:</span>
-                <span class="rank-badge" [ngClass]="getXepLoaiClass(selectedDrl.xepLoai)">
-                  {{ formatXepLoai(selectedDrl.xepLoai) }}
-                </span>
-              </div>
-
-              <!-- Ghi chú SV (nếu có) -->
-              @if (selectedDrl.ghiChuSinhVien) {
-                <div class="student-note-card">
-                  <div class="note-header">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span>Ghi chú của sinh viên:</span>
-                  </div>
-                  <p class="note-body">{{ selectedDrl.ghiChuSinhVien }}</p>
-                </div>
-              }
-
-              <!-- Minh chứng SV (nếu có) -->
-              @if (selectedDrl.minhChung) {
-                <div class="student-evidence-card">
-                  <div class="evidence-header">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                    </svg>
-                    <span>Minh chứng rèn luyện:</span>
-                  </div>
-                  <a [href]="selectedDrl.minhChung" target="_blank" rel="noopener noreferrer" class="evidence-link-btn">
-                    <span>🔗 Mở tài liệu / link minh chứng đính kèm</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                      <polyline points="15 3 21 3 21 9"/>
-                      <line x1="10" y1="14" x2="21" y2="3"/>
-                    </svg>
-                  </a>
-                </div>
-              }
-            </div>
-
-            <!-- Cột phải: Điểm do Admin duyệt -->
-            <div class="review-col admin-side">
-              <div class="col-header admin-header">
-                <div class="col-title-group">
-                  <div class="col-icon admin-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3>Hội Đồng Xét Duyệt</h3>
-                    <span class="col-sub">Chấm điểm chuẩn hóa và phê duyệt</span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="btn-copy-scores"
-                  (click)="copyStudentScores()"
-                  title="Sao chép toàn bộ điểm sinh viên tự chấm sang cột duyệt"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                  </svg>
-                  <span>Sao chép điểm SV</span>
-                </button>
-              </div>
-
-              <form [formGroup]="duyetForm" class="duyet-form">
-                <div class="criteria-inputs-list">
-                  <!-- TC1 Input -->
-                  <div class="criteria-input-row" [class.input-error]="duyetForm.get('tieuChi1Admin')?.invalid && duyetForm.get('tieuChi1Admin')?.touched">
-                    <div class="input-info">
-                      <div class="input-tag-row">
-                        <span class="c-tag tag-blue">Tiêu chí 1</span>
-                        <span class="c-limit">0 - 20đ</span>
-                      </div>
-                      <label for="tc1Admin" class="input-name">Ý thức và kết quả học tập</label>
-                    </div>
-                    <div class="input-box-wrapper">
-                      <input
-                        id="tc1Admin"
-                        type="number"
-                        min="0"
-                        max="20"
-                        formControlName="tieuChi1Admin"
-                        class="score-input"
-                      />
-                      <span class="input-unit">/ 20</span>
-                    </div>
-                  </div>
-
-                  <!-- TC2 Input -->
-                  <div class="criteria-input-row" [class.input-error]="duyetForm.get('tieuChi2Admin')?.invalid && duyetForm.get('tieuChi2Admin')?.touched">
-                    <div class="input-info">
-                      <div class="input-tag-row">
-                        <span class="c-tag tag-purple">Tiêu chí 2</span>
-                        <span class="c-limit">0 - 25đ</span>
-                      </div>
-                      <label for="tc2Admin" class="input-name">Chấp hành nội quy, quy chế</label>
-                    </div>
-                    <div class="input-box-wrapper">
-                      <input
-                        id="tc2Admin"
-                        type="number"
-                        min="0"
-                        max="25"
-                        formControlName="tieuChi2Admin"
-                        class="score-input"
-                      />
-                      <span class="input-unit">/ 25</span>
-                    </div>
-                  </div>
-
-                  <!-- TC3 Input -->
-                  <div class="criteria-input-row" [class.input-error]="duyetForm.get('tieuChi3Admin')?.invalid && duyetForm.get('tieuChi3Admin')?.touched">
-                    <div class="input-info">
-                      <div class="input-tag-row">
-                        <span class="c-tag tag-emerald">Tiêu chí 3</span>
-                        <span class="c-limit">0 - 20đ</span>
-                      </div>
-                      <label for="tc3Admin" class="input-name">Hoạt động phong trào, tình nguyện</label>
-                    </div>
-                    <div class="input-box-wrapper">
-                      <input
-                        id="tc3Admin"
-                        type="number"
-                        min="0"
-                        max="20"
-                        formControlName="tieuChi3Admin"
-                        class="score-input"
-                      />
-                      <span class="input-unit">/ 20</span>
-                    </div>
-                  </div>
-
-                  <!-- TC4 Input -->
-                  <div class="criteria-input-row" [class.input-error]="duyetForm.get('tieuChi4Admin')?.invalid && duyetForm.get('tieuChi4Admin')?.touched">
-                    <div class="input-info">
-                      <div class="input-tag-row">
-                        <span class="c-tag tag-amber">Tiêu chí 4</span>
-                        <span class="c-limit">0 - 25đ</span>
-                      </div>
-                      <label for="tc4Admin" class="input-name">Phẩm chất công dân & cộng đồng</label>
-                    </div>
-                    <div class="input-box-wrapper">
-                      <input
-                        id="tc4Admin"
-                        type="number"
-                        min="0"
-                        max="25"
-                        formControlName="tieuChi4Admin"
-                        class="score-input"
-                      />
-                      <span class="input-unit">/ 25</span>
-                    </div>
-                  </div>
-
-                  <!-- TC5 Input -->
-                  <div class="criteria-input-row" [class.input-error]="duyetForm.get('tieuChi5Admin')?.invalid && duyetForm.get('tieuChi5Admin')?.touched">
-                    <div class="input-info">
-                      <div class="input-tag-row">
-                        <span class="c-tag tag-indigo">Tiêu chí 5</span>
-                        <span class="c-limit">0 - 10đ</span>
-                      </div>
-                      <label for="tc5Admin" class="input-name">Phụ trách lớp & đoàn thể</label>
-                    </div>
-                    <div class="input-box-wrapper">
-                      <input
-                        id="tc5Admin"
-                        type="number"
-                        min="0"
-                        max="10"
-                        formControlName="tieuChi5Admin"
-                        class="score-input"
-                      />
-                      <span class="input-unit">/ 10</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Realtime Calculation Box -->
-                <div class="calc-result-box">
-                  <div class="calc-item total">
-                    <span class="calc-label">Tổng điểm Hội đồng:</span>
-                    <div class="calc-score-val">
-                      <span class="total-points">{{ currentAdminTotal }}</span>
-                      <span class="unit">/ 100đ</span>
-                    </div>
-                  </div>
-                  <div class="calc-divider"></div>
-                  <div class="calc-item rank">
-                    <span class="calc-label">Xếp loại chính thức:</span>
-                    <span class="rank-badge" [ngClass]="getXepLoaiClass(currentAdminClassification)">
-                      {{ currentAdminClassification }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Nhận xét / Lý do từ chối -->
-                <div class="form-feedback-group">
-                  <label for="adminNhanXet" class="feedback-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                    <span>Nhận xét của Hội đồng / Lý do từ chối (nếu có):</span>
-                  </label>
-                  <textarea
-                    id="adminNhanXet"
-                    rows="3"
-                    formControlName="nhanXetAdmin"
-                    class="admin-textarea"
-                    placeholder="Ghi nhận xét đánh giá hoặc nêu rõ lý do nếu yêu cầu sinh viên sửa đổi, bổ sung minh chứng..."
-                  ></textarea>
-                </div>
-              </form>
-            </div>
+      <!-- Student & Evaluation Info Strip Banner -->
+      <div class="student-info-strip">
+        <div class="student-profile-summary">
+          <div class="student-avatar-badge">
+            {{ selectedDrl.hoTen ? selectedDrl.hoTen.slice(0, 1).toUpperCase() : 'S' }}
           </div>
-        </div>
-
-        <!-- Modal Footer Actions -->
-        <div class="modal-footer">
-          <div class="footer-left">
-            <button
-              type="button"
-              class="btn-modal-pdf"
-              (click)="exportPhieuPdf(selectedDrl)"
-              [disabled]="exportingPdfId === selectedDrl.id"
-              title="Xuất phiếu kết quả ĐRL của sinh viên này ra file PDF (JasperReports)"
-            >
-              @if (exportingPdfId === selectedDrl.id) {
-                <span class="btn-spinner-sm"></span>
-                <span>Đang tạo PDF...</span>
-              } @else {
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <path d="M12 18v-6m0 6l-3-3m3 3l3-3"/>
+          <div class="student-meta">
+            <div class="name-row">
+              <span class="student-name">{{ selectedDrl.hoTen }}</span>
+              <span class="badge-mssv">{{ selectedDrl.mssv }}</span>
+              <span class="badge" [ngClass]="getBadgeClass(selectedDrl.trangThai)">
+                {{ getTrangThaiText(selectedDrl.trangThai) }}
+              </span>
+            </div>
+            <div class="details-row">
+              <span class="detail-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
-                <span>Xuất Phiếu PDF</span>
-              }
-            </button>
-            <button type="button" class="btn-cancel" (click)="closeModal()" [disabled]="saving">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-              <span>Đóng</span>
-            </button>
-          </div>
-          <div class="footer-right">
-            <button
-              type="button"
-              class="btn-reject"
-              (click)="submitDuyet(false)"
-              [disabled]="saving"
-              title="Từ chối kết quả và yêu cầu sinh viên bổ sung minh chứng"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              <span>Từ chối / Yêu cầu sửa</span>
-            </button>
-            <button
-              type="button"
-              class="btn-approve"
-              (click)="submitDuyet(true)"
-              [disabled]="saving"
-              title="Phê chuẩn chính thức kết quả rèn luyện"
-            >
-              @if (saving) {
-                <div class="btn-spinner"></div>
-                <span>Đang xử lý...</span>
-              } @else {
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
+                Lớp: {{ selectedDrl.tenLop }}
+              </span>
+              <span class="sep">•</span>
+              <span class="detail-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 </svg>
-                <span>Phê duyệt kết quả</span>
-              }
-            </button>
+                Khoa: {{ selectedDrl.tenKhoa }}
+              </span>
+              <span class="sep">•</span>
+              <span class="detail-item dot-name">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                {{ selectedDrl.tenDot || ('Đánh giá ĐRL Học kỳ ' + selectedDrl.hocKy + ' (' + selectedDrl.namHoc + ')')
+                }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Modal Body: 2 Columns Side-by-Side Review Grid -->
+      <div class="modal-body modal-scroll">
+        <div class="criteria-review-grid">
+          <!-- Cột trái: Kết quả tự chấm của SV -->
+          <div class="review-col student-side">
+            <div class="col-header student-header">
+              <div class="col-title-group">
+                <div class="col-icon student-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3>Sinh Viên Tự Đánh Giá</h3>
+                  <span class="col-sub">Kết quả kê khai do sinh viên nộp</span>
+                </div>
+              </div>
+              <div class="score-pill sv-pill">
+                <span class="pill-label">Tổng SV:</span>
+                <strong class="pill-val">{{ selectedDrl.tongDiemSv }}<small>/100đ</small></strong>
+              </div>
+            </div>
+
+            <!-- 5 tiêu chí sinh viên tự đánh giá -->
+            <div class="criteria-list">
+              <!-- TC1 -->
+              <div class="criteria-item">
+                <div class="c-info">
+                  <div class="c-tag-row">
+                    <span class="c-tag tag-blue">Tiêu chí 1</span>
+                    <span class="c-limit">Tối đa 20đ</span>
+                  </div>
+                  <div class="c-name">Ý thức và kết quả học tập</div>
+                  <div class="c-progress-bar">
+                    <div class="c-progress-fill fill-blue" [style.width.%]="(selectedDrl.tieuChi1Sv / 20) * 100"></div>
+                  </div>
+                </div>
+                <div class="c-score-display">
+                  <span class="score-big">{{ selectedDrl.tieuChi1Sv }}</span>
+                  <span class="score-max">/ 20</span>
+                </div>
+              </div>
+
+              <!-- TC2 -->
+              <div class="criteria-item">
+                <div class="c-info">
+                  <div class="c-tag-row">
+                    <span class="c-tag tag-purple">Tiêu chí 2</span>
+                    <span class="c-limit">Tối đa 25đ</span>
+                  </div>
+                  <div class="c-name">Chấp hành nội quy, quy chế</div>
+                  <div class="c-progress-bar">
+                    <div class="c-progress-fill fill-purple" [style.width.%]="(selectedDrl.tieuChi2Sv / 25) * 100">
+                    </div>
+                  </div>
+                </div>
+                <div class="c-score-display">
+                  <span class="score-big">{{ selectedDrl.tieuChi2Sv }}</span>
+                  <span class="score-max">/ 25</span>
+                </div>
+              </div>
+
+              <!-- TC3 -->
+              <div class="criteria-item">
+                <div class="c-info">
+                  <div class="c-tag-row">
+                    <span class="c-tag tag-emerald">Tiêu chí 3</span>
+                    <span class="c-limit">Tối đa 20đ</span>
+                  </div>
+                  <div class="c-name">Hoạt động phong trào, tình nguyện</div>
+                  <div class="c-progress-bar">
+                    <div class="c-progress-fill fill-emerald" [style.width.%]="(selectedDrl.tieuChi3Sv / 20) * 100">
+                    </div>
+                  </div>
+                </div>
+                <div class="c-score-display">
+                  <span class="score-big">{{ selectedDrl.tieuChi3Sv }}</span>
+                  <span class="score-max">/ 20</span>
+                </div>
+              </div>
+
+              <!-- TC4 -->
+              <div class="criteria-item">
+                <div class="c-info">
+                  <div class="c-tag-row">
+                    <span class="c-tag tag-amber">Tiêu chí 4</span>
+                    <span class="c-limit">Tối đa 25đ</span>
+                  </div>
+                  <div class="c-name">Phẩm chất công dân & cộng đồng</div>
+                  <div class="c-progress-bar">
+                    <div class="c-progress-fill fill-amber" [style.width.%]="(selectedDrl.tieuChi4Sv / 25) * 100"></div>
+                  </div>
+                </div>
+                <div class="c-score-display">
+                  <span class="score-big">{{ selectedDrl.tieuChi4Sv }}</span>
+                  <span class="score-max">/ 25</span>
+                </div>
+              </div>
+
+              <!-- TC5 -->
+              <div class="criteria-item">
+                <div class="c-info">
+                  <div class="c-tag-row">
+                    <span class="c-tag tag-indigo">Tiêu chí 5</span>
+                    <span class="c-limit">Tối đa 10đ</span>
+                  </div>
+                  <div class="c-name">Phụ trách lớp & đoàn thể</div>
+                  <div class="c-progress-bar">
+                    <div class="c-progress-fill fill-indigo" [style.width.%]="(selectedDrl.tieuChi5Sv / 10) * 100">
+                    </div>
+                  </div>
+                </div>
+                <div class="c-score-display">
+                  <span class="score-big">{{ selectedDrl.tieuChi5Sv }}</span>
+                  <span class="score-max">/ 10</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Thẻ xếp loại dự kiến của SV -->
+            <div class="student-rank-row">
+              <span class="rank-title">Dự kiến xếp loại SV:</span>
+              <span class="rank-badge" [ngClass]="getXepLoaiClass(selectedDrl.xepLoai)">
+                {{ formatXepLoai(selectedDrl.xepLoai) }}
+              </span>
+            </div>
+
+            <!-- Ghi chú SV (nếu có) -->
+            @if (selectedDrl.ghiChuSinhVien) {
+            <div class="student-note-card">
+              <div class="note-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>Ghi chú của sinh viên:</span>
+              </div>
+              <p class="note-body">{{ selectedDrl.ghiChuSinhVien }}</p>
+            </div>
+            }
+
+            <!-- Minh chứng SV (nếu có) -->
+            @if (selectedDrl.minhChung) {
+            <div class="student-evidence-card">
+              <div class="evidence-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                <span>Minh chứng rèn luyện:</span>
+              </div>
+              <a [href]="selectedDrl.minhChung" target="_blank" rel="noopener noreferrer" class="evidence-link-btn">
+                <span>🔗 Mở tài liệu / link minh chứng đính kèm</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </a>
+            </div>
+            }
+          </div>
+
+          <!-- Cột phải: Điểm do Admin duyệt -->
+          <div class="review-col admin-side">
+            <div class="col-header admin-header">
+              <div class="col-title-group">
+                <div class="col-icon admin-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3>Hội Đồng Xét Duyệt</h3>
+                  <span class="col-sub">Chấm điểm chuẩn hóa và phê duyệt</span>
+                </div>
+              </div>
+              <button type="button" class="btn-copy-scores" (click)="copyStudentScores()"
+                title="Sao chép toàn bộ điểm sinh viên tự chấm sang cột duyệt">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+                <span>Sao chép điểm SV</span>
+              </button>
+            </div>
+
+            <form [formGroup]="duyetForm" class="duyet-form">
+              <div class="criteria-inputs-list">
+                <!-- TC1 Input -->
+                <div class="criteria-input-row"
+                  [class.input-error]="duyetForm.get('tieuChi1Admin')?.invalid && duyetForm.get('tieuChi1Admin')?.touched">
+                  <div class="input-info">
+                    <div class="input-tag-row">
+                      <span class="c-tag tag-blue">Tiêu chí 1</span>
+                      <span class="c-limit">0 - 20đ</span>
+                    </div>
+                    <label for="tc1Admin" class="input-name">Ý thức và kết quả học tập</label>
+                  </div>
+                  <div class="input-box-wrapper">
+                    <input id="tc1Admin" type="number" min="0" max="20" formControlName="tieuChi1Admin"
+                      class="score-input" />
+                    <span class="input-unit">/ 20</span>
+                  </div>
+                </div>
+
+                <!-- TC2 Input -->
+                <div class="criteria-input-row"
+                  [class.input-error]="duyetForm.get('tieuChi2Admin')?.invalid && duyetForm.get('tieuChi2Admin')?.touched">
+                  <div class="input-info">
+                    <div class="input-tag-row">
+                      <span class="c-tag tag-purple">Tiêu chí 2</span>
+                      <span class="c-limit">0 - 25đ</span>
+                    </div>
+                    <label for="tc2Admin" class="input-name">Chấp hành nội quy, quy chế</label>
+                  </div>
+                  <div class="input-box-wrapper">
+                    <input id="tc2Admin" type="number" min="0" max="25" formControlName="tieuChi2Admin"
+                      class="score-input" />
+                    <span class="input-unit">/ 25</span>
+                  </div>
+                </div>
+
+                <!-- TC3 Input -->
+                <div class="criteria-input-row"
+                  [class.input-error]="duyetForm.get('tieuChi3Admin')?.invalid && duyetForm.get('tieuChi3Admin')?.touched">
+                  <div class="input-info">
+                    <div class="input-tag-row">
+                      <span class="c-tag tag-emerald">Tiêu chí 3</span>
+                      <span class="c-limit">0 - 20đ</span>
+                    </div>
+                    <label for="tc3Admin" class="input-name">Hoạt động phong trào, tình nguyện</label>
+                  </div>
+                  <div class="input-box-wrapper">
+                    <input id="tc3Admin" type="number" min="0" max="20" formControlName="tieuChi3Admin"
+                      class="score-input" />
+                    <span class="input-unit">/ 20</span>
+                  </div>
+                </div>
+
+                <!-- TC4 Input -->
+                <div class="criteria-input-row"
+                  [class.input-error]="duyetForm.get('tieuChi4Admin')?.invalid && duyetForm.get('tieuChi4Admin')?.touched">
+                  <div class="input-info">
+                    <div class="input-tag-row">
+                      <span class="c-tag tag-amber">Tiêu chí 4</span>
+                      <span class="c-limit">0 - 25đ</span>
+                    </div>
+                    <label for="tc4Admin" class="input-name">Phẩm chất công dân & cộng đồng</label>
+                  </div>
+                  <div class="input-box-wrapper">
+                    <input id="tc4Admin" type="number" min="0" max="25" formControlName="tieuChi4Admin"
+                      class="score-input" />
+                    <span class="input-unit">/ 25</span>
+                  </div>
+                </div>
+
+                <!-- TC5 Input -->
+                <div class="criteria-input-row"
+                  [class.input-error]="duyetForm.get('tieuChi5Admin')?.invalid && duyetForm.get('tieuChi5Admin')?.touched">
+                  <div class="input-info">
+                    <div class="input-tag-row">
+                      <span class="c-tag tag-indigo">Tiêu chí 5</span>
+                      <span class="c-limit">0 - 10đ</span>
+                    </div>
+                    <label for="tc5Admin" class="input-name">Phụ trách lớp & đoàn thể</label>
+                  </div>
+                  <div class="input-box-wrapper">
+                    <input id="tc5Admin" type="number" min="0" max="10" formControlName="tieuChi5Admin"
+                      class="score-input" />
+                    <span class="input-unit">/ 10</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Realtime Calculation Box -->
+              <div class="calc-result-box">
+                <div class="calc-item total">
+                  <span class="calc-label">Tổng điểm Hội đồng:</span>
+                  <div class="calc-score-val">
+                    <span class="total-points">{{ currentAdminTotal }}</span>
+                    <span class="unit">/ 100đ</span>
+                  </div>
+                </div>
+                <div class="calc-divider"></div>
+                <div class="calc-item rank">
+                  <span class="calc-label">Xếp loại chính thức:</span>
+                  <span class="rank-badge" [ngClass]="getXepLoaiClass(currentAdminClassification)">
+                    {{ currentAdminClassification }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Nhận xét / Lý do từ chối -->
+              <div class="form-feedback-group">
+                <label for="adminNhanXet" class="feedback-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  <span>Nhận xét của Hội đồng / Lý do từ chối (nếu có):</span>
+                </label>
+                <textarea id="adminNhanXet" rows="3" formControlName="nhanXetAdmin" class="admin-textarea"
+                  placeholder="Ghi nhận xét đánh giá hoặc nêu rõ lý do nếu yêu cầu sinh viên sửa đổi, bổ sung minh chứng..."></textarea>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="modal-footer">
+        <div class="footer-left">
+          <button type="button" class="btn-modal-pdf" (click)="exportPhieuPdf(selectedDrl)"
+            [disabled]="exportingPdfId === selectedDrl.id"
+            title="Xuất phiếu kết quả ĐRL của sinh viên này ra file PDF (JasperReports)">
+            @if (exportingPdfId === selectedDrl.id) {
+            <span class="btn-spinner-sm"></span>
+            <span>Đang tạo PDF...</span>
+            } @else {
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <path d="M12 18v-6m0 6l-3-3m3 3l3-3" />
+            </svg>
+            <span>Xuất Phiếu PDF</span>
+            }
+          </button>
+          <button type="button" class="btn-cancel" (click)="closeModal()" [disabled]="saving">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            <span>Đóng</span>
+          </button>
+        </div>
+        <div class="footer-right">
+          <button type="button" class="btn-reject" (click)="submitDuyet(false)" [disabled]="saving"
+            title="Từ chối kết quả và yêu cầu sinh viên bổ sung minh chứng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>Từ chối / Yêu cầu sửa</span>
+          </button>
+          <button type="button" class="btn-approve" (click)="submitDuyet(true)" [disabled]="saving"
+            title="Phê chuẩn chính thức kết quả rèn luyện">
+            @if (saving) {
+            <div class="btn-spinner"></div>
+            <span>Đang xử lý...</span>
+            } @else {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <span>Phê duyệt kết quả</span>
+            }
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
   }
 </div>

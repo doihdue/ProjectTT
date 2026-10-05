@@ -51,29 +51,6 @@
     }
   </nav>
 
-  <!-- Global Feedback Message -->
-  @if (feedbackMessage) {
-  <div class="portal-alert" [class.alert-success]="feedbackMessage.type === 'success'"
-    [class.alert-danger]="feedbackMessage.type === 'error'">
-    <div class="alert-icon">
-      @if (feedbackMessage.type === 'success') {
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-        <polyline points="22 4 12 14.01 9 11.01" />
-      </svg>
-      } @else {
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-      }
-    </div>
-    <div class="alert-content">{{ feedbackMessage.text }}</div>
-    <button type="button" class="alert-close" (click)="feedbackMessage = null">✕</button>
-  </div>
-  }
-
   <!-- TAB 1: ĐÁNH GIÁ ĐIỂM RÈN LUYỆN -->
   @if (mode === 'evaluation') {
   <section class="portal-card">
@@ -683,7 +660,15 @@
                 </label>
                 <input type="text" formControlName="email" placeholder="Nhập địa chỉ email..." />
                 @if (profileForm.get('email')?.touched && profileForm.get('email')?.invalid) {
-                  <span class="form-error">Email bắt buộc và phải có định dạng hợp lệ</span>
+                  @if (profileForm.get('email')?.errors?.['serverError']) {
+                    <span class="form-error">{{ profileForm.get('email')?.errors?.['serverError'] }}</span>
+                  } @else if (profileForm.get('email')?.errors?.['required']) {
+                    <span class="form-error">Email không được để trống</span>
+                  } @else if (profileForm.get('email')?.errors?.['maxlength']) {
+                    <span class="form-error">Email tối đa 150 ký tự</span>
+                  } @else {
+                    <span class="form-error">Email không đúng định dạng</span>
+                  }
                 }
               </div>
 
@@ -697,7 +682,11 @@
                 </label>
                 <input type="tel" formControlName="soDienThoai" placeholder="0912 345 678" />
                 @if (profileForm.get('soDienThoai')?.touched && profileForm.get('soDienThoai')?.invalid) {
-                  <span class="form-error">Số điện thoại không hợp lệ (từ 8 đến 20 số)</span>
+                  @if (profileForm.get('soDienThoai')?.errors?.['serverError']) {
+                    <span class="form-error">{{ profileForm.get('soDienThoai')?.errors?.['serverError'] }}</span>
+                  } @else {
+                    <span class="form-error">Số điện thoại tối đa 20 ký tự</span>
+                  }
                 }
               </div>
             </div>
@@ -713,7 +702,11 @@
               <input type="text" formControlName="diaChi"
                 placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..." />
               @if (profileForm.get('diaChi')?.touched && profileForm.get('diaChi')?.invalid) {
-                <span class="form-error">Địa chỉ không được vượt quá 255 ký tự</span>
+                @if (profileForm.get('diaChi')?.errors?.['serverError']) {
+                  <span class="form-error">{{ profileForm.get('diaChi')?.errors?.['serverError'] }}</span>
+                } @else {
+                  <span class="form-error">Địa chỉ tối đa 255 ký tự</span>
+                }
               }
             </div>
 

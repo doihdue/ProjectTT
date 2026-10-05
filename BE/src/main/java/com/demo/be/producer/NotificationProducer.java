@@ -39,7 +39,7 @@ public class NotificationProducer {
             );
             log.info("[RABBITMQ PRODUCER] ===> Gửi message thành công tới RabbitMQ Queue: {}", RabbitMQConfig.QUEUE_NAME);
         } catch (AmqpException e) {
-            log.warn("[RABBITMQ PRODUCER] [FALLBACK] Không thể kết nối tới RabbitMQ Server (5672): {}. Tự động chuyển sang xử lý trực tiếp nội bộ...", e.getMessage());
+            log.warn("[RABBITMQ PRODUCER] [FALLBACK] Lỗi khi gửi tới RabbitMQ ({}). Tự động chuyển sang xử lý trực tiếp nội bộ...", e.getMessage());
             // Fallback an toàn: vẫn lưu thông báo cho sinh viên & giảng viên mà không gây lỗi request
             thongBaoService.processNotificationEvent(event);
         }

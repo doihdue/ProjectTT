@@ -2,6 +2,18 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+export type PageResponse<T> = {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+};
 
 export type SinhVienItem = {
   id: number;
@@ -55,6 +67,9 @@ export function generateStudentEmail(hoTen: string, mssv: string): string {
   return `${namePart}.${mssvPart}@.stu.edu.vn`;
 }
 
+import { ToastService } from '../../../services/toast.service';
+import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
+
 @Component({
   selector: 'app-admin-sinh-vien',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -65,6 +80,8 @@ export class AdminSinhVienComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
   private readonly cd = inject(ChangeDetectorRef);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   protected sinhViens: SinhVienItem[] = [];
   protected lops: LopOption[] = [];
@@ -79,18 +96,30 @@ export class AdminSinhVienComponent implements OnInit {
   protected errorMessage = '';
   protected successMessage = '';
 
+  // --- SERVER-SIDE PHÂN TRANG & TÌM KIẾM (ENTITY MANAGER BE) ---
+  protected currentPage = 1;
+  protected pageSize = 10;
+  protected totalElements = 0;
+  protected totalPages = 1;
+
+  private readonly searchSubject = new Subject<string>();
+
   protected readonly form = this.fb.group({
     lopId: ['', Validators.required],
     ngayNhapHoc: ['2022-09-05'],
     mssv: [''],
     hoTen: ['', [Validators.required, Validators.maxLength(150)]],
-    ngaySinh: [''],
+    ngaySinh: ['', [Validators.required]],
     gioiTinh: ['Nam'],
     email: [''],
     soDienThoai: ['', [Validators.maxLength(20)]],
     diaChi: ['', [Validators.maxLength(255)]],
     active: [true],
   });
+
+  protected get todayDate(): string {
+    return new Date().toISOString().split('T')[0];
+  }
 
   protected get previewEmail(): string {
     const hoTen = this.form.get('hoTen')?.value || '';
@@ -101,6 +130,14 @@ export class AdminSinhVienComponent implements OnInit {
   ngOnInit(): void {
     this.loadLops();
     this.loadSinhViens();
+
+    // Debounce tìm kiếm 350ms để tối ưu số lần gọi API về Backend EntityManager
+    this.searchSubject
+      .pipe(debounceTime(350), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadSinhViens();
+      });
 
     this.form.get('lopId')?.valueChanges.subscribe(() => {
       if (this.editingId === null) {
@@ -146,52 +183,69 @@ export class AdminSinhVienComponent implements OnInit {
     });
   }
 
+  /**
+   * Gọi API tìm kiếm & phân trang trực tiếp từ Backend (EntityManager + Dynamic JPQL)
+   */
   protected loadSinhViens(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.http.get<SinhVienItem[]>('http://localhost:8080/api/sinh-vien').subscribe({
-      next: (res) => {
-        this.sinhViens = res;
-        this.loading = false;
-        this.cd.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Không thể tải danh sách sinh viên.';
-        this.loading = false;
-        this.cd.detectChanges();
-      },
-    });
+
+    const params: Record<string, string> = {
+      page: String(this.currentPage - 1),
+      size: String(this.pageSize),
+    };
+
+    const q = this.searchText.trim();
+    if (q) {
+      params['keyword'] = q;
+    }
+    if (this.filterLopId) {
+      params['lopId'] = this.filterLopId;
+    }
+    if (this.filterGender) {
+      params['gioiTinh'] = this.filterGender;
+    }
+
+    this.http
+      .get<PageResponse<SinhVienItem>>('http://localhost:8080/api/sinh-vien/search', { params })
+      .subscribe({
+        next: (res) => {
+          this.sinhViens = res?.content || [];
+          this.totalElements = res?.totalElements || 0;
+          this.totalPages = res?.totalPages || 1;
+          this.loading = false;
+          this.cd.detectChanges();
+        },
+        error: () => {
+          this.errorMessage = 'Không thể tải danh sách sinh viên từ máy chủ.';
+          this.loading = false;
+          this.cd.detectChanges();
+        },
+      });
   }
 
-  protected get filteredSinhViens(): SinhVienItem[] {
-    const q = this.searchText.trim().toLowerCase();
-    return this.sinhViens.filter((item) => {
-      const matchSearch =
-        !q ||
-        item.mssv.toLowerCase().includes(q) ||
-        item.hoTen.toLowerCase().includes(q) ||
-        item.email.toLowerCase().includes(q) ||
-        (item.soDienThoai && item.soDienThoai.includes(q));
-      const matchLop = !this.filterLopId || String(item.lopId) === this.filterLopId;
-      const matchGender = !this.filterGender || item.gioiTinh === this.filterGender;
-      return matchSearch && matchLop && matchGender;
-    });
+  protected onSearchInput(val: string): void {
+    this.searchText = val;
+    this.searchSubject.next(val);
   }
-
-  // --- PHÂN TRANG (PAGINATION) ---
-  protected currentPage = 1;
-  protected pageSize = 10;
 
   protected onFilterChange(): void {
     this.currentPage = 1;
+    this.loadSinhViens();
   }
 
   protected onPageSizeChange(): void {
     this.currentPage = 1;
+    this.loadSinhViens();
   }
 
-  protected get totalPages(): number {
-    return Math.ceil(this.filteredSinhViens.length / this.pageSize) || 1;
+  // Tương thích template
+  protected get filteredSinhViens(): SinhVienItem[] {
+    return this.sinhViens;
+  }
+
+  protected get paginatedSinhViens(): SinhVienItem[] {
+    return this.sinhViens;
   }
 
   protected get startIndex(): number {
@@ -199,12 +253,7 @@ export class AdminSinhVienComponent implements OnInit {
   }
 
   protected get endIndex(): number {
-    return Math.min(this.startIndex + this.pageSize, this.filteredSinhViens.length);
-  }
-
-  protected get paginatedSinhViens(): SinhVienItem[] {
-    const start = this.startIndex;
-    return this.filteredSinhViens.slice(start, start + this.pageSize);
+    return Math.min(this.startIndex + this.sinhViens.length, this.totalElements);
   }
 
   protected get visiblePages(): number[] {
@@ -219,23 +268,44 @@ export class AdminSinhVienComponent implements OnInit {
   }
 
   protected goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
-      this.cd.detectChanges();
+      this.loadSinhViens();
     }
   }
 
   protected submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    const isValid = this.toastService.validateForm(
+      this.form,
+      {
+        lopId: 'Lớp học',
+        hoTen: 'Họ và tên sinh viên',
+        mssv: 'Mã số sinh viên (MSSV)',
+        ngaySinh: 'Ngày sinh',
+        soDienThoai: 'Số điện thoại',
+        diaChi: 'Địa chỉ',
+      },
+      'Vui lòng điền đúng thông tin Sinh viên'
+    );
+
+    if (!isValid) {
+      this.errorMessage = 'Vui lòng kiểm tra lại các trường thông tin bắt buộc (được đánh dấu đỏ).';
       return;
     }
 
     const val = this.form.getRawValue();
+
+    if (val.ngaySinh && new Date(val.ngaySinh) > new Date()) {
+      this.form.get('ngaySinh')?.setErrors({ futureDate: true });
+      this.toastService.warning('Thông tin không hợp lệ', 'Ngày sinh phải là một ngày trong quá khứ.');
+      this.errorMessage = 'Ngày sinh phải là một ngày trong quá khứ.';
+      return;
+    }
+
     const payload = {
       mssv: val.mssv?.trim(),
       hoTen: val.hoTen?.trim(),
-      ngaySinh: val.ngaySinh || null,
+      ngaySinh: val.ngaySinh,
       gioiTinh: val.gioiTinh || 'Nam',
       email: val.email?.trim() || null,
       soDienThoai: val.soDienThoai?.trim() || null,
@@ -256,15 +326,21 @@ export class AdminSinhVienComponent implements OnInit {
     req.subscribe({
       next: () => {
         this.saving = false;
-        this.successMessage = this.editingId === null
-          ? 'Thêm mới sinh viên thành công! Tài khoản đăng nhập đã được tạo (mật khẩu mặc định: ngày sinh ddMMyyyy).'
+        const msg = this.editingId === null
+          ? 'Thêm mới sinh viên thành công! Tài khoản đăng nhập đã được tạo.'
           : 'Cập nhật thông tin sinh viên thành công!';
+        this.successMessage = msg;
+        this.toastService.success(
+          this.editingId === null ? 'Thêm mới thành công' : 'Cập nhật thành công',
+          msg
+        );
         this.loadSinhViens();
         this.resetForm();
       },
       error: (err) => {
         this.saving = false;
-        this.errorMessage = err?.error?.message || 'Không thể lưu sinh viên. Kiểm tra MSSV và email có bị trùng không.';
+        this.errorMessage = err?.error?.message || 'Không thể lưu sinh viên. Vui lòng kiểm tra lại thông tin.';
+        this.toastService.showHttpError(err, 'Lưu thông tin Sinh viên thất bại', this.form);
         this.cd.detectChanges();
       },
     });
@@ -287,19 +363,34 @@ export class AdminSinhVienComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  protected remove(item: SinhVienItem): void {
-    if (!confirm(`Bạn có chắc muốn xóa sinh viên ${item.hoTen} (MSSV: ${item.mssv})? Phiếu điểm rèn luyện liên quan cũng sẽ bị xóa.`)) {
+  protected async remove(item: SinhVienItem): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Xác nhận xóa sinh viên',
+      message: `Bạn có chắc chắn muốn xóa sinh viên ${item.hoTen} (MSSV: ${item.mssv})?`,
+      detailMessage: 'Toàn bộ phiếu điểm rèn luyện và lịch sử liên quan của sinh viên này cũng sẽ bị xóa vĩnh viễn khỏi hệ thống.',
+      confirmText: 'Xác nhận xóa',
+      cancelText: 'Hủy bỏ',
+      type: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.http.delete(`http://localhost:8080/api/sinh-vien/${item.id}`).subscribe({
       next: () => {
-        this.sinhViens = this.sinhViens.filter((x) => x.id !== item.id);
-        this.successMessage = `Đã xóa sinh viên ${item.mssv} thành công.`;
+        const msg = `Đã xóa sinh viên ${item.mssv} (${item.hoTen}) thành công.`;
+        this.successMessage = msg;
+        this.toastService.success('Đã xóa thành công', msg);
+        if (this.sinhViens.length === 1 && this.currentPage > 1) {
+          this.currentPage--;
+        }
+        this.loadSinhViens();
         this.cd.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.errorMessage = 'Không thể xóa sinh viên này.';
+        this.toastService.showHttpError(err, 'Không thể xóa sinh viên');
         this.cd.detectChanges();
       },
     });
@@ -332,16 +423,31 @@ export class AdminSinhVienComponent implements OnInit {
     return match ? `Khóa ${match[1]}` : '';
   }
 
-  protected resetPassword(sv: SinhVienItem): void {
-    if (!confirm(`Bạn có chắc muốn cấp lại mật khẩu đăng nhập cho sinh viên ${sv.hoTen} (${sv.mssv})?`)) {
+  protected async resetPassword(sv: SinhVienItem): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Cấp lại mật khẩu',
+      message: `Bạn có chắc muốn cấp lại mật khẩu đăng nhập cho sinh viên ${sv.hoTen} (${sv.mssv})?`,
+      detailMessage: 'Mật khẩu cũ của sinh viên sẽ bị thay thế bằng mật khẩu mặc định mới.',
+      confirmText: 'Cấp lại mật khẩu',
+      cancelText: 'Hủy bỏ',
+      type: 'warning',
+    });
+
+    if (!confirmed) {
       return;
     }
+
     this.http.post(`http://localhost:8080/api/sinh-vien/${sv.id}/reset-password`, {}, { responseType: 'text' }).subscribe({
       next: (pw) => {
-        alert(`Đã cấp lại mật khẩu thành công!\n\nTài khoản (MSSV): ${sv.mssv}\nMật khẩu đăng nhập: ${pw}\n\n(Quy tắc: Ngày sinh dạng ddMMyyyy, hoặc 'student123' nếu không có ngày sinh)`);
+        this.confirmDialog.alert({
+          title: 'Cấp lại mật khẩu thành công',
+          message: `Tài khoản (MSSV): ${sv.mssv}\nMật khẩu mới: ${pw}\n\n(Quy tắc: Ngày sinh ddMMyyyy hoặc 'student123')`,
+          confirmText: 'Đã sao lưu / Hoàn tất',
+          type: 'success',
+        });
       },
-      error: () => {
-        alert('Không thể đặt lại mật khẩu cho sinh viên này. Vui lòng kiểm tra lại!');
+      error: (err) => {
+        this.toastService.showHttpError(err, 'Không thể đặt lại mật khẩu');
       },
     });
   }

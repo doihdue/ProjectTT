@@ -1,5 +1,6 @@
 package com.demo.be.controller;
 
+import com.demo.be.dto.common.PageResponse;
 import com.demo.be.dto.khoa.KhoaRequest;
 import com.demo.be.dto.khoa.KhoaResponse;
 import com.demo.be.service.KhoaService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,6 +31,15 @@ public class KhoaController {
     @GetMapping
     public ResponseEntity<List<KhoaResponse>> getAll() {
         return ResponseEntity.ok(khoaService.findAll());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<KhoaResponse>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(khoaService.searchAndFilter(keyword, page, size));
     }
 
     @GetMapping("/{id}")

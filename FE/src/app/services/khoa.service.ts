@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { PageResponse } from '../pages/admin/sinh-vien/admin-sinh-vien.component';
 
 export type Khoa = {
   id: number;
@@ -24,6 +25,10 @@ export class KhoaService {
 
   findAll(): Observable<Khoa[]> {
     return this.http.get<Khoa[]>(this.apiUrl);
+  }
+
+  search(params: Record<string, string>): Observable<PageResponse<Khoa>> {
+    return this.http.get<PageResponse<Khoa>>(`${this.apiUrl}/search`, { params });
   }
 
   create(payload: KhoaPayload): Observable<Khoa> {

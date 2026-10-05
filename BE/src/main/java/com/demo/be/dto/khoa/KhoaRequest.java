@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record KhoaRequest(
-        @NotBlank(message = "Ma khoa is required") @Size(max = 20, message = "Ma khoa must be at most 20 characters") String maKhoa,
-        @NotBlank(message = "Ten khoa is required") @Size(max = 150, message = "Ten khoa must be at most 150 characters") String tenKhoa,
-        @Size(max = 500, message = "Mo ta must be at most 500 characters") String moTa,
+        @NotBlank(message = "Mã khoa không được để trống") @Size(max = 20, message = "Mã khoa tối đa 20 ký tự") String maKhoa,
+        @NotBlank(message = "Tên khoa không được để trống") @Size(max = 150, message = "Tên khoa tối đa 150 ký tự") String tenKhoa,
+        @Size(max = 500, message = "Mô tả tối đa 500 ký tự") String moTa,
         Boolean active
 ) {
 }

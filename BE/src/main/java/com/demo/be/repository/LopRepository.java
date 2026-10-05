@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface LopRepository extends JpaRepository<Lop, Long> {
+public interface LopRepository extends JpaRepository<Lop, Long>, LopRepositoryCustom {
     Optional<Lop> findByMaLop(String maLop);
 
     @Query("SELECT l.maLop FROM Lop l WHERE l.maLop LIKE CONCAT(:prefix, '%')")

@@ -17,6 +17,8 @@ import {
   StudentService,
 } from '../../services/student.service';
 
+import { ToastService } from '../../services/toast.service';
+
 export type PortalMode = 'evaluation' | 'results' | 'profile';
 
 @Component({
@@ -33,6 +35,7 @@ export class StudentPortalComponent implements OnInit {
   private readonly drlService = inject(DiemRenLuyenService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly cd = inject(ChangeDetectorRef);
+  private readonly toastService = inject(ToastService);
 
   protected mode: PortalMode = 'evaluation';
 
@@ -328,23 +331,32 @@ export class StudentPortalComponent implements OnInit {
 
   protected submitDrl(): void {
     if (!this.selectedDot) {
-      this.feedbackMessage = {
-        type: 'error',
-        text: 'Hiện tại Nhà trường chưa mở đợt đánh giá rèn luyện nào hoặc các đợt đã đóng.',
-      };
+      const errText = 'Hiện tại Nhà trường chưa mở đợt đánh giá rèn luyện nào hoặc các đợt đã đóng.';
+      this.feedbackMessage = { type: 'error', text: errText };
+      this.toastService.error('Không có đợt đánh giá', errText);
       return;
     }
 
     if (this.currentDotExistingDrl && this.currentDotExistingDrl.trangThai === 'DA_DUYET') {
-      this.feedbackMessage = {
-        type: 'error',
-        text: `Phiếu rèn luyện của đợt "${this.selectedDot.tenDot}" đã được Ban Quản trị phê duyệt chính thức. Bạn không thể nộp lại!`,
-      };
+      const errText = `Phiếu rèn luyện của đợt "${this.selectedDot.tenDot}" đã được Ban Quản trị phê duyệt chính thức. Bạn không thể nộp lại!`;
+      this.feedbackMessage = { type: 'error', text: errText };
+      this.toastService.warning('Phiếu đã được duyệt', errText);
       return;
     }
 
-    if (this.drlForm.invalid) {
-      this.drlForm.markAllAsTouched();
+    const isValid = this.toastService.validateForm(
+      this.drlForm,
+      {
+        tieuChi1Sv: 'Tiêu chí 1 (Ý thức học tập: 0-20 điểm)',
+        tieuChi2Sv: 'Tiêu chí 2 (Kỷ luật & quy chế: 0-25 điểm)',
+        tieuChi3Sv: 'Tiêu chí 3 (Hoạt động chính trị, XH: 0-20 điểm)',
+        tieuChi4Sv: 'Tiêu chí 4 (Phẩm chất công dân: 0-25 điểm)',
+        tieuChi5Sv: 'Tiêu chí 5 (Cán bộ lớp/đoàn thể: 0-10 điểm)',
+      },
+      'Điểm tự đánh giá không hợp lệ'
+    );
+
+    if (!isValid) {
       this.feedbackMessage = {
         type: 'error',
         text: 'Vui lòng kiểm tra lại điểm các tiêu chí (phải nằm trong khoảng quy định).',
@@ -372,19 +384,23 @@ export class StudentPortalComponent implements OnInit {
     this.drlService.submitDrl(payload).subscribe({
       next: (res) => {
         this.submittingDrl = false;
+        const msg = `Đã nộp phiếu đánh giá ĐRL "${this.selectedDot?.tenDot || `Học kỳ ${res.hocKy}`}" thành công! Phiếu đã được chuyển đến Ban Quản trị chờ xét duyệt.`;
         this.feedbackMessage = {
           type: 'success',
-          text: `Đã nộp phiếu đánh giá ĐRL "${this.selectedDot?.tenDot || `Học kỳ ${res.hocKy}`}" thành công! Phiếu đã được chuyển đến Ban Quản trị chờ xét duyệt.`,
+          text: msg,
         };
+        this.toastService.success('Nộp phiếu thành công', msg);
         this.loadDrlHistory();
         this.cd.markForCheck();
       },
       error: (err) => {
         this.submittingDrl = false;
+        const msg = 'Nộp phiếu thất bại: ' + (err?.error?.message || err.message);
         this.feedbackMessage = {
           type: 'error',
-          text: 'Nộp phiếu thất bại: ' + (err?.error?.message || err.message),
+          text: msg,
         };
+        this.toastService.showHttpError(err, 'Nộp phiếu thất bại');
         this.cd.markForCheck();
       },
     });
@@ -420,8 +436,17 @@ export class StudentPortalComponent implements OnInit {
 
   protected saveProfile(): void {
     this.contactFeedback = null;
-    if (this.profileForm.invalid) {
-      this.profileForm.markAllAsTouched();
+    const isValid = this.toastService.validateForm(
+      this.profileForm,
+      {
+        email: 'Địa chỉ Email',
+        soDienThoai: 'Số điện thoại',
+        diaChi: 'Địa chỉ liên hệ / Thường trú',
+      },
+      'Thông tin liên hệ không hợp lệ'
+    );
+
+    if (!isValid) {
       this.contactFeedback = {
         type: 'error',
         text: 'Vui lòng kiểm tra lại thông tin: Email không được để trống và phải đúng định dạng; Số điện thoại từ 8-20 số.',
@@ -442,37 +467,52 @@ export class StudentPortalComponent implements OnInit {
           diaChi: prof.diaChi || '',
         });
         this.savingProfile = false;
+        const msg = 'Cập nhật thông tin liên hệ và địa chỉ thường trú thành công!';
         this.contactFeedback = {
           type: 'success',
-          text: 'Cập nhật thông tin liên hệ và địa chỉ thường trú thành công!',
+          text: msg,
         };
         this.feedbackMessage = this.contactFeedback;
+        this.toastService.success('Cập nhật hồ sơ thành công', msg);
         this.cd.markForCheck();
       },
       error: (err) => {
         this.savingProfile = false;
+        const msg = 'Không thể cập nhật hồ sơ: ' + (err?.error?.message || err.message || 'Lỗi hệ thống');
         this.contactFeedback = {
           type: 'error',
-          text: 'Không thể cập nhật hồ sơ: ' + (err?.error?.message || err.message || 'Lỗi hệ thống'),
+          text: msg,
         };
         this.feedbackMessage = this.contactFeedback;
+        this.toastService.showHttpError(err, 'Cập nhật hồ sơ thất bại');
         this.cd.markForCheck();
       },
     });
   }
 
   protected changePassword(): void {
-    if (this.passwordForm.invalid) {
-      this.passwordForm.markAllAsTouched();
+    const isValid = this.toastService.validateForm(
+      this.passwordForm,
+      {
+        oldPassword: 'Mật khẩu hiện tại',
+        newPassword: 'Mật khẩu mới (tối thiểu 6 ký tự)',
+        confirmPassword: 'Xác nhận mật khẩu mới',
+      },
+      'Thông tin đổi mật khẩu chưa hợp lệ'
+    );
+
+    if (!isValid) {
       return;
     }
 
     const { oldPassword, newPassword, confirmPassword } = this.passwordForm.getRawValue();
     if (newPassword !== confirmPassword) {
+      const msg = 'Mật khẩu mới và xác nhận mật khẩu không khớp!';
       this.feedbackMessage = {
         type: 'error',
-        text: 'Mật khẩu mới và xác nhận mật khẩu không khớp!',
+        text: msg,
       };
+      this.toastService.warning('Xác nhận mật khẩu thất bại', msg);
       return;
     }
 
@@ -482,18 +522,22 @@ export class StudentPortalComponent implements OnInit {
       next: (res) => {
         this.changingPassword = false;
         this.passwordForm.reset();
+        const msg = res.message || 'Đổi mật khẩu thành công!';
         this.feedbackMessage = {
           type: 'success',
-          text: res.message || 'Đổi mật khẩu thành công!',
+          text: msg,
         };
+        this.toastService.success('Đổi mật khẩu thành công', msg);
         this.cd.markForCheck();
       },
       error: (err) => {
         this.changingPassword = false;
+        const msg = 'Đổi mật khẩu thất bại: ' + (err?.error?.message || 'Mật khẩu cũ không đúng.');
         this.feedbackMessage = {
           type: 'error',
-          text: 'Đổi mật khẩu thất bại: ' + (err?.error?.message || 'Mật khẩu cũ không đúng.'),
+          text: msg,
         };
+        this.toastService.showHttpError(err, 'Đổi mật khẩu thất bại');
         this.cd.markForCheck();
       },
     });
@@ -559,7 +603,7 @@ export class StudentPortalComponent implements OnInit {
   protected exportingPdfId: number | null = null;
 
   protected exportPhieuPdf(item: DiemRenLuyenItem): void {
-    if (!item?.id) return;
+    if (item?.id == null) return;
     this.exportingPdfId = item.id;
     this.cd.detectChanges();
 

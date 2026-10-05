@@ -1,5 +1,6 @@
 package com.demo.be.controller;
 
+import com.demo.be.dto.common.PageResponse;
 import com.demo.be.dto.lop.LopRequest;
 import com.demo.be.dto.lop.LopResponse;
 import com.demo.be.service.LopService;
@@ -31,6 +32,16 @@ public class LopController {
     @GetMapping
     public ResponseEntity<List<LopResponse>> getAll() {
         return ResponseEntity.ok(lopService.findAll());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<LopResponse>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long khoaId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(lopService.searchAndFilter(keyword, khoaId, page, size));
     }
 
     @GetMapping("/next-ma-lop")

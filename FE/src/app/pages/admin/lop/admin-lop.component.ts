@@ -1,7 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ToastService } from '../../../services/toast.service';
+import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
+import { PageResponse } from '../sinh-vien/admin-sinh-vien.component';
 
 export type LopItem = {
   id: number;
@@ -20,6 +25,25 @@ export type KhoaOption = {
   tenKhoa: string;
 };
 
+function nienKhoaValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  const match = trimmed.match(/^(\d{4})\s*[-–—]\s*(\d{4})$/);
+  if (!match) {
+    return { invalidFormat: true };
+  }
+  const start = parseInt(match[1], 10);
+  const end = parseInt(match[2], 10);
+  if (start >= end) {
+    return { invalidYearRange: { startYear: start, endYear: end } };
+  }
+  if (end - start > 10) {
+    return { invalidDuration: true };
+  }
+  return null;
+}
+
 @Component({
   selector: 'app-admin-lop',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -30,6 +54,8 @@ export class AdminLopComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
   private readonly cd = inject(ChangeDetectorRef);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   protected lops: LopItem[] = [];
   protected khoas: KhoaOption[] = [];
@@ -43,9 +69,17 @@ export class AdminLopComponent implements OnInit {
   protected errorMessage = '';
   protected successMessage = '';
 
+  // Server-side pagination & search via EntityManager
+  protected currentPage = 1;
+  protected pageSize = 10;
+  protected totalElements = 0;
+  protected totalPages = 1;
+
+  private readonly searchSubject = new Subject<string>();
+
   protected readonly form = this.fb.group({
     khoaId: ['', Validators.required],
-    nienKhoa: ['2022-2026', [Validators.required, Validators.maxLength(20)]],
+    nienKhoa: ['2022-2026', [Validators.required, Validators.maxLength(20), nienKhoaValidator]],
     maLop: [''],
     tenLop: ['', [Validators.required, Validators.maxLength(150)]],
     siSoToiDa: [45, [Validators.required, Validators.min(1)]],
@@ -55,6 +89,14 @@ export class AdminLopComponent implements OnInit {
   ngOnInit(): void {
     this.loadOptions();
     this.loadLops();
+
+    // Debounce tìm kiếm 350ms
+    this.searchSubject
+      .pipe(debounceTime(350), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadLops();
+      });
 
     this.form.get('khoaId')?.valueChanges.subscribe(() => {
       if (this.editingId === null) {
@@ -100,49 +142,65 @@ export class AdminLopComponent implements OnInit {
     });
   }
 
+  /**
+   * Tải danh sách lớp học theo tìm kiếm & phân trang trực tiếp từ Backend EntityManager
+   */
   protected loadLops(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.http.get<LopItem[]>('http://localhost:8080/api/lop').subscribe({
-      next: (res) => {
-        this.lops = res;
-        this.loading = false;
-        this.cd.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Không thể tải danh sách lớp học.';
-        this.loading = false;
-        this.cd.detectChanges();
-      },
-    });
+
+    const params: Record<string, string> = {
+      page: String(this.currentPage - 1),
+      size: String(this.pageSize),
+    };
+
+    const q = this.searchText.trim();
+    if (q) {
+      params['keyword'] = q;
+    }
+    if (this.filterKhoaId) {
+      params['khoaId'] = this.filterKhoaId;
+    }
+
+    this.http
+      .get<PageResponse<LopItem>>('http://localhost:8080/api/lop/search', { params })
+      .subscribe({
+        next: (res) => {
+          this.lops = res?.content || [];
+          this.totalElements = res?.totalElements || 0;
+          this.totalPages = res?.totalPages || 1;
+          this.loading = false;
+          this.cd.detectChanges();
+        },
+        error: () => {
+          this.errorMessage = 'Không thể tải danh sách lớp học từ máy chủ.';
+          this.loading = false;
+          this.cd.detectChanges();
+        },
+      });
   }
 
-  protected get filteredLops(): LopItem[] {
-    const q = this.searchText.trim().toLowerCase();
-    return this.lops.filter((item) => {
-      const matchSearch =
-        !q ||
-        item.maLop.toLowerCase().includes(q) ||
-        item.tenLop.toLowerCase().includes(q);
-      const matchKhoa = !this.filterKhoaId || String(item.khoaId) === this.filterKhoaId;
-      return matchSearch && matchKhoa;
-    });
+  protected onSearchInput(val: string): void {
+    this.searchText = val;
+    this.searchSubject.next(val);
   }
-
-  // --- PHÂN TRANG (PAGINATION) ---
-  protected currentPage = 1;
-  protected pageSize = 10;
 
   protected onFilterChange(): void {
     this.currentPage = 1;
+    this.loadLops();
   }
 
   protected onPageSizeChange(): void {
     this.currentPage = 1;
+    this.loadLops();
   }
 
-  protected get totalPages(): number {
-    return Math.ceil(this.filteredLops.length / this.pageSize) || 1;
+  protected get filteredLops(): LopItem[] {
+    return this.lops;
+  }
+
+  protected get paginatedLops(): LopItem[] {
+    return this.lops;
   }
 
   protected get startIndex(): number {
@@ -150,12 +208,7 @@ export class AdminLopComponent implements OnInit {
   }
 
   protected get endIndex(): number {
-    return Math.min(this.startIndex + this.pageSize, this.filteredLops.length);
-  }
-
-  protected get paginatedLops(): LopItem[] {
-    const start = this.startIndex;
-    return this.filteredLops.slice(start, start + this.pageSize);
+    return Math.min(this.startIndex + this.lops.length, this.totalElements);
   }
 
   protected get visiblePages(): number[] {
@@ -170,15 +223,26 @@ export class AdminLopComponent implements OnInit {
   }
 
   protected goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
-      this.cd.detectChanges();
+      this.loadLops();
     }
   }
 
   protected submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    const isValid = this.toastService.validateForm(
+      this.form,
+      {
+        khoaId: 'Khoa trực thuộc',
+        tenLop: 'Tên lớp',
+        nienKhoa: 'Niên khóa',
+        siSoToiDa: 'Sĩ số tối đa',
+      },
+      'Vui lòng điền đúng thông tin Lớp học'
+    );
+
+    if (!isValid) {
+      this.errorMessage = 'Vui lòng kiểm tra lại các trường thông tin bắt buộc (được đánh dấu đỏ).';
       return;
     }
 
@@ -203,13 +267,19 @@ export class AdminLopComponent implements OnInit {
     req.subscribe({
       next: (saved) => {
         this.saving = false;
-        this.successMessage = this.editingId === null ? 'Thêm mới lớp học thành công!' : 'Cập nhật lớp học thành công!';
+        const msg = this.editingId === null ? 'Thêm mới lớp học thành công!' : 'Cập nhật lớp học thành công!';
+        this.successMessage = msg;
+        this.toastService.success(
+          this.editingId === null ? 'Thêm mới thành công' : 'Cập nhật thành công',
+          msg
+        );
         this.loadLops();
         this.resetForm();
       },
       error: (err) => {
         this.saving = false;
-        this.errorMessage = err?.error?.message || 'Không thể lưu lớp học. Vui lòng kiểm tra mã lớp đã tồn tại chưa.';
+        this.errorMessage = err?.error?.message || 'Không thể lưu lớp học. Vui lòng kiểm tra lại thông tin.';
+        this.toastService.showHttpError(err, 'Lưu thông tin Lớp thất bại', this.form);
         this.cd.detectChanges();
       },
     });
@@ -228,19 +298,34 @@ export class AdminLopComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  protected remove(item: LopItem): void {
-    if (!confirm(`Bạn có chắc muốn xóa lớp ${item.tenLop} (${item.maLop})?`)) {
+  protected async remove(item: LopItem): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Xác nhận xóa Lớp học',
+      message: `Bạn có chắc chắn muốn xóa lớp "${item.tenLop}" (Mã: ${item.maLop})?`,
+      detailMessage: 'Lưu ý: Không thể xóa lớp học nếu đã có sinh viên đăng ký thuộc lớp này.',
+      confirmText: 'Xác nhận xóa',
+      cancelText: 'Hủy bỏ',
+      type: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.http.delete(`http://localhost:8080/api/lop/${item.id}`).subscribe({
       next: () => {
-        this.lops = this.lops.filter((x) => x.id !== item.id);
-        this.successMessage = `Đã xóa lớp ${item.maLop} thành công.`;
+        const msg = `Đã xóa lớp ${item.maLop} (${item.tenLop}) thành công.`;
+        this.successMessage = msg;
+        this.toastService.success('Đã xóa thành công', msg);
+        if (this.lops.length === 1 && this.currentPage > 1) {
+          this.currentPage--;
+        }
+        this.loadLops();
         this.cd.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.errorMessage = 'Không thể xóa lớp học này (có thể đã có sinh viên thuộc lớp).';
+        this.toastService.showHttpError(err, 'Không thể xóa lớp học');
         this.cd.detectChanges();
       },
     });

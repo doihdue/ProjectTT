@@ -2,7 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Khoa, KhoaPayload, KhoaService } from '../../../services/khoa.service';
+import { ToastService } from '../../../services/toast.service';
+import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 
 @Component({
   selector: 'app-admin-khoa',
@@ -14,6 +18,8 @@ export class AdminKhoaComponent {
   private readonly fb = inject(FormBuilder);
   private readonly khoaService = inject(KhoaService);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   protected readonly form = this.fb.nonNullable.group({
     maKhoa: ['', [Validators.required, Validators.maxLength(20)]],
@@ -30,16 +36,47 @@ export class AdminKhoaComponent {
   protected errorMessage = '';
   protected successMessage = '';
 
+  // Server-side pagination & search via EntityManager
+  protected currentPage = 1;
+  protected pageSize = 10;
+  protected totalElements = 0;
+  protected totalPages = 1;
+
+  private readonly searchSubject = new Subject<string>();
+
   constructor() {
+    this.searchSubject
+      .pipe(debounceTime(350), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadKhoas();
+      });
+
     this.loadKhoas();
   }
 
+  /**
+   * Tải danh sách khoa theo tìm kiếm & phân trang trực tiếp từ Backend EntityManager
+   */
   protected loadKhoas(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.khoaService.findAll().subscribe({
-      next: (khoas) => {
-        this.khoas = khoas;
+
+    const params: Record<string, string> = {
+      page: String(this.currentPage - 1),
+      size: String(this.pageSize),
+    };
+
+    const q = this.searchText.trim();
+    if (q) {
+      params['keyword'] = q;
+    }
+
+    this.khoaService.search(params).subscribe({
+      next: (res) => {
+        this.khoas = res?.content || [];
+        this.totalElements = res?.totalElements || 0;
+        this.totalPages = res?.totalPages || 1;
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -51,32 +88,27 @@ export class AdminKhoaComponent {
     });
   }
 
-  protected get filteredKhoas(): Khoa[] {
-    const q = this.searchText.trim().toLowerCase();
-    return this.khoas.filter((k) => {
-      return (
-        !q ||
-        k.maKhoa.toLowerCase().includes(q) ||
-        k.tenKhoa.toLowerCase().includes(q) ||
-        (k.moTa && k.moTa.toLowerCase().includes(q))
-      );
-    });
+  protected onSearchInput(val: string): void {
+    this.searchText = val;
+    this.searchSubject.next(val);
   }
-
-  // --- PHÂN TRANG (PAGINATION) ---
-  protected currentPage = 1;
-  protected pageSize = 10;
 
   protected onFilterChange(): void {
     this.currentPage = 1;
+    this.loadKhoas();
   }
 
   protected onPageSizeChange(): void {
     this.currentPage = 1;
+    this.loadKhoas();
   }
 
-  protected get totalPages(): number {
-    return Math.ceil(this.filteredKhoas.length / this.pageSize) || 1;
+  protected get filteredKhoas(): Khoa[] {
+    return this.khoas;
+  }
+
+  protected get paginatedKhoas(): Khoa[] {
+    return this.khoas;
   }
 
   protected get startIndex(): number {
@@ -84,12 +116,7 @@ export class AdminKhoaComponent {
   }
 
   protected get endIndex(): number {
-    return Math.min(this.startIndex + this.pageSize, this.filteredKhoas.length);
-  }
-
-  protected get paginatedKhoas(): Khoa[] {
-    const start = this.startIndex;
-    return this.filteredKhoas.slice(start, start + this.pageSize);
+    return Math.min(this.startIndex + this.khoas.length, this.totalElements);
   }
 
   protected get visiblePages(): number[] {
@@ -104,15 +131,25 @@ export class AdminKhoaComponent {
   }
 
   protected goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
-      this.changeDetector.detectChanges();
+      this.loadKhoas();
     }
   }
 
   protected submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    const isValid = this.toastService.validateForm(
+      this.form,
+      {
+        maKhoa: 'Mã khoa',
+        tenKhoa: 'Tên khoa',
+        moTa: 'Mô tả',
+      },
+      'Vui lòng điền đúng thông tin Khoa'
+    );
+
+    if (!isValid) {
+      this.errorMessage = 'Vui lòng kiểm tra lại các trường thông tin bắt buộc (được đánh dấu đỏ).';
       return;
     }
 
@@ -127,7 +164,12 @@ export class AdminKhoaComponent {
     request.subscribe({
       next: (savedKhoa) => {
         this.saving = false;
-        this.successMessage = this.editingId === null ? 'Thêm mới Khoa thành công!' : 'Cập nhật Khoa thành công!';
+        const msg = this.editingId === null ? 'Thêm mới Khoa thành công!' : 'Cập nhật Khoa thành công!';
+        this.successMessage = msg;
+        this.toastService.success(
+          this.editingId === null ? 'Thêm mới thành công' : 'Cập nhật thành công',
+          msg
+        );
         this.khoas = this.editingId === null
           ? [...this.khoas, savedKhoa]
           : this.khoas.map((khoa) => (khoa.id === savedKhoa.id ? savedKhoa : khoa));
@@ -136,7 +178,8 @@ export class AdminKhoaComponent {
       },
       error: (err) => {
         this.saving = false;
-        this.errorMessage = err?.error?.message || 'Không thể lưu khoa. Kiểm tra mã khoa đã tồn tại.';
+        this.errorMessage = err?.error?.message || 'Không thể lưu khoa. Vui lòng kiểm tra lại thông tin.';
+        this.toastService.showHttpError(err, 'Lưu thông tin Khoa thất bại', this.form);
         this.changeDetector.detectChanges();
       },
     });
@@ -153,19 +196,34 @@ export class AdminKhoaComponent {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  protected remove(khoa: Khoa): void {
-    if (!confirm(`Bạn có chắc muốn xóa khoa ${khoa.tenKhoa} (${khoa.maKhoa})?`)) {
+  protected async remove(khoa: Khoa): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Xác nhận xóa Khoa',
+      message: `Bạn có chắc chắn muốn xóa khoa "${khoa.tenKhoa}" (Mã: ${khoa.maKhoa})?`,
+      detailMessage: 'Lưu ý: Không thể xóa khoa nếu đang có các lớp hành chính hoặc học phần trực thuộc đơn vị này.',
+      confirmText: 'Xác nhận xóa',
+      cancelText: 'Hủy bỏ',
+      type: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.khoaService.delete(khoa.id).subscribe({
       next: () => {
-        this.khoas = this.khoas.filter((item) => item.id !== khoa.id);
-        this.successMessage = `Đã xóa khoa ${khoa.maKhoa} thành công.`;
+        const msg = `Đã xóa khoa ${khoa.maKhoa} (${khoa.tenKhoa}) thành công.`;
+        this.successMessage = msg;
+        this.toastService.success('Đã xóa thành công', msg);
+        if (this.khoas.length === 1 && this.currentPage > 1) {
+          this.currentPage--;
+        }
+        this.loadKhoas();
         this.changeDetector.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.errorMessage = 'Không thể xóa khoa này (có thể có lớp hoặc môn học đang trực thuộc khoa).';
+        this.toastService.showHttpError(err, 'Không thể xóa khoa');
         this.changeDetector.detectChanges();
       },
     });

@@ -304,10 +304,10 @@ public class DiemRenLuyenServiceImpl implements DiemRenLuyenService {
                 drl.getTieuChi5Admin(),
                 drl.getTongDiemAdmin(),
                 xepLoai,
-                drl.getTrangThai(),
                 drl.getGhiChuSinhVien(),
                 drl.getMinhChung(),
                 drl.getNhanXetAdmin(),
+                drl.getTrangThai(),
                 drl.getNgayNop(),
                 drl.getNgayDuyet(),
                 drl.getNguoiDuyet()

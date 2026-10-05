@@ -26,6 +26,9 @@ export type LopOption = {
   khoaId?: number;
 };
 
+import { ToastService } from '../../../services/toast.service';
+import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
+
 @Component({
   selector: 'app-admin-drl',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -37,6 +40,8 @@ export class AdminDrlComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
   private readonly cd = inject(ChangeDetectorRef);
+  private readonly toastService = inject(ToastService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   // Active Tab
   protected activeTab: 'drl' | 'dot' = 'drl';
@@ -91,12 +96,31 @@ export class AdminDrlComponent implements OnInit {
   protected readonly dotForm = this.fb.group({
     tenDot: ['', [Validators.required, Validators.maxLength(150)]],
     hocKy: [1, [Validators.required, Validators.min(1), Validators.max(3)]],
-    namHoc: ['2026-2027', [Validators.required]],
-    ngayBatDau: [''],
-    ngayKetThuc: [''],
+    namHoc: ['2026-2027', [Validators.required, Validators.pattern(/^\d{4}-\d{4}$/)]],
+    ngayBatDau: ['', [Validators.required]],
+    ngayKetThuc: ['', [Validators.required]],
     trangThai: ['DANG_MO', [Validators.required]],
     ghiChu: [''],
   });
+
+  protected get isEndDateInvalid(): boolean {
+    const s = this.dotForm.get('ngayBatDau')?.value;
+    const e = this.dotForm.get('ngayKetThuc')?.value;
+    if (s && e) {
+      return new Date(e) <= new Date(s);
+    }
+    return false;
+  }
+
+  protected get isNamHocInvalid(): boolean {
+    const nh = (this.dotForm.get('namHoc')?.value || '').trim();
+    if (!nh) return false;
+    const match = nh.match(/^(\d{4})-(\d{4})$/);
+    if (!match) return true;
+    const startYear = parseInt(match[1], 10);
+    const endYear = parseInt(match[2], 10);
+    return endYear !== startYear + 1;
+  }
 
   ngOnInit(): void {
     this.loadDots();
@@ -154,12 +178,16 @@ export class AdminDrlComponent implements OnInit {
       }
     }
 
+    const today = new Date();
+    const defaultEndDate = new Date();
+    defaultEndDate.setDate(today.getDate() + 14);
+
     this.dotForm.reset({
       tenDot: `Đánh giá ĐRL Học kỳ ${nextHk} (${nextNamHoc})`,
       hocKy: nextHk,
       namHoc: nextNamHoc,
-      ngayBatDau: new Date().toISOString().split('T')[0],
-      ngayKetThuc: '',
+      ngayBatDau: today.toISOString().split('T')[0],
+      ngayKetThuc: defaultEndDate.toISOString().split('T')[0],
       trangThai: 'DANG_MO',
       ghiChu: '',
     });
@@ -187,18 +215,69 @@ export class AdminDrlComponent implements OnInit {
   }
 
   protected saveDot(): void {
-    if (this.dotForm.invalid) {
-      this.dotForm.markAllAsTouched();
+    const isValid = this.toastService.validateForm(
+      this.dotForm,
+      {
+        tenDot: 'Tên đợt đánh giá',
+        hocKy: 'Học kỳ',
+        namHoc: 'Năm học (định dạng YYYY-YYYY)',
+        ngayBatDau: 'Thời gian bắt đầu mở đợt',
+        ngayKetThuc: 'Hạn chót kết thúc đợt',
+        trangThai: 'Trạng thái đợt',
+      },
+      'Vui lòng điền đúng thông tin Đợt đánh giá'
+    );
+
+    if (!isValid) return;
+
+    const val = this.dotForm.getRawValue();
+
+    // 1. Kiểm tra logic năm học (Năm sau = Năm trước + 1)
+    const nh = (val.namHoc || '').trim();
+    const nhMatch = nh.match(/^(\d{4})-(\d{4})$/);
+    if (!nhMatch) {
+      this.toastService.warning(
+        'Năm học không đúng định dạng',
+        'Năm học phải theo đúng định dạng YYYY-YYYY (ví dụ: 2026-2027).'
+      );
+      return;
+    }
+    const startYear = parseInt(nhMatch[1], 10);
+    const endYear = parseInt(nhMatch[2], 10);
+    if (endYear !== startYear + 1) {
+      this.toastService.warning(
+        'Năm học không hợp lệ',
+        `Năm học "${nh}" không hợp lệ: Năm kết thúc (${endYear}) phải sau năm bắt đầu (${startYear}) đúng 1 năm (ví dụ: ${startYear}-${startYear + 1}).`
+      );
       return;
     }
 
-    const val = this.dotForm.getRawValue();
+    // 2. Kiểm tra thời gian kết thúc luôn phải sau thời gian bắt đầu
+    if (!val.ngayBatDau) {
+      this.toastService.warning('Thiếu thời gian bắt đầu', 'Vui lòng chọn ngày bắt đầu mở đợt đánh giá.');
+      return;
+    }
+    if (!val.ngayKetThuc) {
+      this.toastService.warning('Thiếu thời gian kết thúc', 'Vui lòng chọn hạn chót kết thúc đợt đánh giá.');
+      return;
+    }
+
+    const startDate = new Date(val.ngayBatDau);
+    const endDate = new Date(val.ngayKetThuc);
+    if (endDate <= startDate) {
+      this.toastService.warning(
+        'Thời gian kết thúc không hợp lệ',
+        `Thời gian kết thúc (${val.ngayKetThuc}) luôn phải sau thời gian bắt đầu (${val.ngayBatDau}) ít nhất 1 ngày.`
+      );
+      return;
+    }
+
     const payload: DotDanhGiaRequest = {
       tenDot: val.tenDot || '',
       hocKy: Number(val.hocKy),
-      namHoc: val.namHoc || '',
-      ngayBatDau: val.ngayBatDau || undefined,
-      ngayKetThuc: val.ngayKetThuc || undefined,
+      namHoc: nh,
+      ngayBatDau: val.ngayBatDau,
+      ngayKetThuc: val.ngayKetThuc,
       trangThai: (val.trangThai as 'DANG_MO' | 'DONG') || 'DANG_MO',
       ghiChu: val.ghiChu || undefined,
     };
@@ -211,13 +290,16 @@ export class AdminDrlComponent implements OnInit {
         next: (res) => {
           this.savingDot = false;
           this.closeDotModal();
-          this.successMessage = `Đã cập nhật đợt đánh giá "${res.tenDot}" thành công!`;
+          const msg = `Đã cập nhật đợt đánh giá "${res.tenDot}" thành công!`;
+          this.successMessage = msg;
+          this.toastService.success('Cập nhật thành công', msg);
           this.loadDots();
           setTimeout(() => (this.successMessage = ''), 4000);
         },
         error: (err) => {
           this.savingDot = false;
           this.errorMessage = 'Cập nhật đợt thất bại: ' + (err?.error?.message || err.message);
+          this.toastService.showHttpError(err, 'Cập nhật đợt đánh giá thất bại');
         },
       });
     } else {
@@ -225,56 +307,92 @@ export class AdminDrlComponent implements OnInit {
         next: (res) => {
           this.savingDot = false;
           this.closeDotModal();
-          this.successMessage = `Đã tạo đợt đánh giá "${res.tenDot}" thành công! Sinh viên hiện có thể thực hiện đánh giá.`;
+          const msg = `Đã tạo đợt đánh giá "${res.tenDot}" thành công! Sinh viên hiện có thể thực hiện đánh giá.`;
+          this.successMessage = msg;
+          this.toastService.success('Tạo đợt thành công', msg);
           this.loadDots();
           setTimeout(() => (this.successMessage = ''), 4000);
         },
         error: (err) => {
           this.savingDot = false;
           this.errorMessage = 'Tạo đợt đánh giá thất bại: ' + (err?.error?.message || err.message);
+          this.toastService.showHttpError(err, 'Tạo đợt đánh giá thất bại');
         },
       });
     }
   }
 
-  protected toggleDotStatus(dot: DotDanhGiaItem): void {
+  protected async toggleDotStatus(dot: DotDanhGiaItem): Promise<void> {
     const actionText = dot.trangThai === 'DANG_MO' ? 'ĐÓNG' : 'MỞ';
-    if (!confirm(`Bạn có chắc muốn ${actionText} đợt đánh giá "${dot.tenDot}"?`)) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: `${actionText} đợt đánh giá`,
+      message: `Bạn có chắc muốn ${actionText} đợt đánh giá "${dot.tenDot}"?`,
+      detailMessage:
+        dot.trangThai === 'DANG_MO'
+          ? 'Khi ĐÓNG đợt, sinh viên sẽ không thể nộp phiếu tự đánh giá rèn luyện cho đợt này nữa.'
+          : 'Khi MỞ đợt, tất cả sinh viên thuộc diện đánh giá có thể truy cập và nộp phiếu.',
+      confirmText: `Xác nhận ${actionText}`,
+      cancelText: 'Hủy bỏ',
+      type: dot.trangThai === 'DANG_MO' ? 'warning' : 'info',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.drlService.toggleDotStatus(dot.id).subscribe({
       next: (res) => {
-        this.successMessage = res.trangThai === 'DANG_MO'
+        const msg = res.trangThai === 'DANG_MO'
           ? `Đã MỞ đợt "${res.tenDot}". Sinh viên có thể nộp đánh giá rèn luyện!`
           : `Đã ĐÓNG đợt "${res.tenDot}". Sinh viên sẽ không thể nộp đánh giá cho đợt này.`;
+        this.successMessage = msg;
+        this.toastService.success('Thành công', msg);
         this.loadDots();
         setTimeout(() => (this.successMessage = ''), 4000);
       },
       error: (err) => {
         this.errorMessage = 'Không thể thay đổi trạng thái đợt: ' + (err?.error?.message || err.message);
+        this.toastService.showHttpError(err, 'Lỗi cập nhật trạng thái đợt');
       },
     });
   }
 
-  protected deleteDot(dot: DotDanhGiaItem): void {
+  protected async deleteDot(dot: DotDanhGiaItem): Promise<void> {
     if (dot.soLuongPhieu > 0) {
-      alert(`Đợt đánh giá "${dot.tenDot}" đã có ${dot.soLuongPhieu} sinh viên nộp phiếu rèn luyện. Không thể xóa đợt này! Bạn hãy chuyển sang Đóng đợt.`);
+      await this.confirmDialog.alert({
+        title: 'Không thể xóa đợt đánh giá',
+        message: `Đợt đánh giá "${dot.tenDot}" hiện đã có ${dot.soLuongPhieu} sinh viên nộp phiếu rèn luyện.`,
+        detailMessage: 'Hệ thống không cho phép xóa đợt đã phát sinh dữ liệu đánh giá của sinh viên. Nếu cần ngừng nhận phiếu, bạn vui lòng chuyển sang trạng thái "Đóng đợt".',
+        confirmText: 'Đã hiểu',
+        type: 'warning',
+      });
       return;
     }
 
-    if (!confirm(`Bạn có chắc muốn xóa đợt đánh giá "${dot.tenDot}"?`)) {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Xác nhận xóa đợt đánh giá',
+      message: `Bạn có chắc chắn muốn xóa vĩnh viễn đợt đánh giá "${dot.tenDot}"?`,
+      detailMessage: 'Thao tác này sẽ xóa hoàn toàn đợt đánh giá khỏi danh mục của hệ thống.',
+      confirmText: 'Xác nhận xóa',
+      cancelText: 'Hủy bỏ',
+      type: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.drlService.deleteDot(dot.id).subscribe({
       next: () => {
-        this.successMessage = `Đã xóa đợt đánh giá "${dot.tenDot}" thành công!`;
+        const msg = `Đã xóa đợt đánh giá "${dot.tenDot}" thành công!`;
+        this.successMessage = msg;
+        this.toastService.success('Đã xóa thành công', msg);
         this.loadDots();
         setTimeout(() => (this.successMessage = ''), 4000);
       },
       error: (err) => {
         this.errorMessage = 'Xóa đợt thất bại: ' + (err?.error?.message || err.message);
+        this.toastService.showHttpError(err, 'Xóa đợt đánh giá thất bại');
       },
     });
   }
@@ -444,9 +562,19 @@ export class AdminDrlComponent implements OnInit {
   protected submitDuyet(chapNhan: boolean): void {
     if (!this.selectedDrl) return;
 
-    if (chapNhan && this.duyetForm.invalid) {
-      this.duyetForm.markAllAsTouched();
-      return;
+    if (chapNhan) {
+      const isValid = this.toastService.validateForm(
+        this.duyetForm,
+        {
+          tieuChi1Admin: 'Tiêu chí 1 (Ý thức học tập: 0-20)',
+          tieuChi2Admin: 'Tiêu chí 2 (Kỷ luật & quy chế: 0-25)',
+          tieuChi3Admin: 'Tiêu chí 3 (Hoạt động chính trị, XH: 0-20)',
+          tieuChi4Admin: 'Tiêu chí 4 (Phẩm chất công dân: 0-25)',
+          tieuChi5Admin: 'Tiêu chí 5 (Cán bộ lớp/đoàn thể: 0-10)',
+        },
+        'Điểm phê duyệt chưa hợp lệ'
+      );
+      if (!isValid) return;
     }
 
     const formVal = this.duyetForm.getRawValue();
@@ -468,9 +596,11 @@ export class AdminDrlComponent implements OnInit {
       next: (res) => {
         this.saving = false;
         this.closeModal();
-        this.successMessage = chapNhan
+        const msg = chapNhan
           ? `Đã phê duyệt ĐRL cho sinh viên ${res.hoTen} (${res.mssv}) thành công: ${res.tongDiemAdmin} điểm (${res.xepLoai})!`
           : `Đã từ chối phiếu ĐRL của sinh viên ${res.hoTen} (${res.mssv}). Thông báo đã gửi về sinh viên!`;
+        this.successMessage = msg;
+        this.toastService.success(chapNhan ? 'Phê duyệt thành công' : 'Đã từ chối phiếu', msg);
         this.loadDrlList();
         this.loadThongKe();
         setTimeout(() => (this.successMessage = ''), 5000);
@@ -478,24 +608,37 @@ export class AdminDrlComponent implements OnInit {
       error: (err) => {
         this.saving = false;
         this.errorMessage = 'Thao tác phê duyệt thất bại: ' + (err?.error?.message || err.message);
+        this.toastService.showHttpError(err, 'Thao tác phê duyệt thất bại');
       },
     });
   }
 
-  protected deleteDrl(item: DiemRenLuyenItem): void {
-    if (!confirm(`Bạn có chắc muốn xóa phiếu ĐRL ${item.tenDot || `Học kỳ ${item.hocKy}`} của sinh viên ${item.hoTen}?`)) {
+  protected async deleteDrl(item: DiemRenLuyenItem): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Xác nhận xóa phiếu ĐRL',
+      message: `Bạn có chắc muốn xóa phiếu điểm rèn luyện ${item.tenDot || `Học kỳ ${item.hocKy}`} của sinh viên "${item.hoTen}" (${item.mssv})?`,
+      detailMessage: 'Dữ liệu đánh giá của học kỳ này sẽ bị hủy bỏ vĩnh viễn khỏi danh sách thống kê.',
+      confirmText: 'Xác nhận xóa',
+      cancelText: 'Hủy bỏ',
+      type: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.drlService.delete(item.id).subscribe({
       next: () => {
-        this.successMessage = 'Đã xóa phiếu điểm rèn luyện thành công!';
+        const msg = 'Đã xóa phiếu điểm rèn luyện thành công!';
+        this.successMessage = msg;
+        this.toastService.success('Đã xóa thành công', msg);
         this.loadDrlList();
         this.loadThongKe();
         setTimeout(() => (this.successMessage = ''), 4000);
       },
       error: (err) => {
         this.errorMessage = 'Không thể xóa phiếu: ' + (err?.error?.message || err.message);
+        this.toastService.showHttpError(err, 'Xóa phiếu ĐRL thất bại');
       },
     });
   }
@@ -557,7 +700,7 @@ export class AdminDrlComponent implements OnInit {
   protected exportingSummary = false;
 
   protected exportPhieuPdf(item: DiemRenLuyenItem): void {
-    if (!item?.id) return;
+    if (item?.id == null) return;
     this.exportingPdfId = item.id;
     this.cd.detectChanges();
 

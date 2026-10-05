@@ -1,5 +1,6 @@
 package com.demo.be.service;
 
+import com.demo.be.dto.common.PageResponse;
 import com.demo.be.dto.sinhvien.SinhVienRequest;
 import com.demo.be.dto.sinhvien.SinhVienResponse;
 import com.demo.be.dto.sinhvien.StudentProfileUpdateRequest;
@@ -80,6 +81,8 @@ public interface SinhVienService {
     String generateNextMssv(Long lopId, LocalDate ngayNhapHoc);
 
     List<SinhVienResponse> findAll();
+
+    PageResponse<SinhVienResponse> searchAndFilter(String keyword, Long lopId, String gioiTinh, int page, int size);
 
     SinhVienResponse findById(Long id);
 
